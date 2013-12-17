@@ -40,6 +40,8 @@ drawUtilityPlots <- function(problem, solution, printLabels = TRUE,
   stopifnot(is.logical(printLabels))
   stopifnot(plotsPerRow > 0)
   stopifnot(length(which(criteria < 0)) == 0)
+  a <- NULL
+  U <- NULL
   
   if (is.null(criteria)) {
     criteria <- c(1:ncol(problem$perf), 0)
