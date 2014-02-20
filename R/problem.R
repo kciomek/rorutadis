@@ -823,7 +823,7 @@ getRestrictions <- function(problem, indices) {
     for (i in seq_len(nrow(problem$assignmentPairwiseAtLeastComparisons))) {
       if (index %in% indices)
         res$assignmentPairwiseAtLeastComparisons <- rbind(res$assignmentPairwiseAtLeastComparisons,
-                                                          problem$problem$assignmentPairwiseAtLeastComparisons[i, ])
+                                                          problem$assignmentPairwiseAtLeastComparisons[i, ])
       index <- index + 1
     }
   }
@@ -831,8 +831,8 @@ getRestrictions <- function(problem, indices) {
   if (!is.null(problem$assignmentPairwiseAtMostComparisons)) {
     for (i in seq_len(nrow(problem$assignmentPairwiseAtMostComparisons))) {
       if (index %in% indices)
-        res$problem$assignmentPairwiseAtMostComparisons <- rbind(res$problem$assignmentPairwiseAtMostComparisons,
-                                                                 problem$problem$assignmentPairwiseAtMostComparisons[i, ])
+        res$assignmentPairwiseAtMostComparisons <- rbind(res$assignmentPairwiseAtMostComparisons,
+                                                                 problem$assignmentPairwiseAtMostComparisons[i, ])
       index <- index + 1
     }
   }
@@ -840,8 +840,8 @@ getRestrictions <- function(problem, indices) {
   if (!is.null(problem$minimalClassCardinalities)) {
     for (i in seq_len(nrow(problem$minimalClassCardinalities))) {
       if (index %in% indices)
-        res$problem$minimalClassCardinalities <- rbind(res$problem$minimalClassCardinalities,
-                                                         problem$problem$minimalClassCardinalities[i, ])
+        res$minimalClassCardinalities <- rbind(res$minimalClassCardinalities,
+                                                         problem$minimalClassCardinalities[i, ])
       index <- index + 1
     }
   }
@@ -849,8 +849,8 @@ getRestrictions <- function(problem, indices) {
   if (!is.null(problem$maximalClassCardinalities)) {
     for (i in seq_len(nrow(problem$maximalClassCardinalities))) {
       if (index %in% indices)
-        res$problem$maximalClassCardinalities <- rbind(res$problem$maximalClassCardinalities,
-                                                         problem$problem$maximalClassCardinalities[i, ])
+        res$maximalClassCardinalities <- rbind(res$maximalClassCardinalities,
+                                                         problem$maximalClassCardinalities[i, ])
       index <- index + 1
     }
   }
