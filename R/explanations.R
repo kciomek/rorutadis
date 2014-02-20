@@ -131,7 +131,7 @@ explainAssignmentQuickly <- function(alternative, fromClass, toClass, problem,
 
 #' Explain assignment
 #'
-#' This function allows to obtain explenation of an alternative assignment to
+#' This function allows to obtain explanation of an alternative assignment to
 #' a specific class interval or one class in case if assignment is necessary.
 #' The function returns all preferential reducts for an assignment relation.
 #'
