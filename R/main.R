@@ -170,7 +170,7 @@ calculateAssignments <- function(problem, necessary) {
   return (rel)
 }
 
-#' Ccompare assignment
+#' Compare assignments
 #'
 #' This function compares assignments. In this version of the package only necessary
 #' assignments are supported.
@@ -237,7 +237,7 @@ compareAssignments <- function(problem, necessary = TRUE) {
 
 #' Calculate extreme class cardinalities
 #'
-#' This function calculates mnimal and maximal possible cardinality
+#' This function calculates minimal and maximal possible cardinality
 #' of each class.
 #'
 #' @param problem Problem for which extreme class cardinalities will be calculated.
@@ -295,8 +295,8 @@ calculateExtremeClassCardinalities <- function(problem) {
 #' alternative \emph{a_i} is \strong{necessarily} in class \emph{C_h}
 #' \strong{for all} decision makers.
 #' }
-#' The first possible-necessary parameter depends on decision makers'
-#' assignemnts computed earlier, and the second is define as function's parameter.
+#' The first possible-necessary parameter depends on decision makers
+#' assignments computed earlier, and the second is define as function parameter.
 #' 
 #' @param assignmentList List of assignment matrices (results of calling
 #' \code{\link{calculateAssignments}} function).

@@ -54,7 +54,7 @@ isModelConsistentForRho <- function(alternative, atLeastToClass, criteria, neces
 #' @param alternative An alternative for assignent deterioration.
 #' @param atLeastToClass An assignment to investigate.
 #' @param criteriaManipulability Vector containing a logical value for each criterion.
-#' Each value denotes whether multipling by \code{rho} on corresponding criterion is allowed or not.
+#' Each value denotes whether multiplying by \code{rho} on corresponding criterion is allowed or not.
 #' At least one criterion has to be available for that manipulation.
 #' @param necessary Whether necessary or possible assignment is considered.
 #' @param problem Problem for which deterioration will be performed.
@@ -170,7 +170,7 @@ deteriorateAssignment <- function(alternative,
 #' @param alternative An alternative for assignent improvement.
 #' @param atLeastToClass Desired assignment.
 #' @param criteriaManipulability Vector containing a logical value for each criterion.
-#' Each value denotes whether multipling by \code{rho} on corresponding criterion is allowed or not.
+#' Each value denotes whether multiplying by \code{rho} on corresponding criterion is allowed or not.
 #' At least one criterion has to be available for that manipulation.
 #' @param necessary Whether necessary or possible assignment is considered.
 #' @param problem Problem for which improvement will be performed.
