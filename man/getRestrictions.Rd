@@ -2,7 +2,7 @@
 \alias{getRestrictions}
 \title{Get restrictions be indices for problem}
 \usage{
-  getRestrictions(problem, indices)
+getRestrictions(problem, indices)
 }
 \arguments{
   \item{problem}{Problem whose restrictions will be
@@ -13,11 +13,11 @@
   Incorrect indices are skipped.}
 }
 \value{
-  List with named elements. Each element is a matrix which
-  contains set of restrictions of same type.
+List with named elements. Each element is a matrix which
+contains set of restrictions of same type.
 }
 \description{
-  This function gets restrictions by indices.
+This function gets restrictions by indices.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.5), ncol = 2)
@@ -35,7 +35,7 @@ preferentialCore <- getPreferentialCore(preferentialReducts)
 coreRestrictions <- getRestrictions(problem, preferentialCore)
 }
 \seealso{
-  \code{\link{getPreferentialCore}}
-  \code{\link{explainAssignment}}
+\code{\link{getPreferentialCore}}
+\code{\link{explainAssignment}}
 }
 

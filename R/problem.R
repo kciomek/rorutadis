@@ -6,10 +6,10 @@
 #' in farther computations.
 #'
 #' @param perf A \emph{n} x \emph{m} performance matrix of \emph{n} alternatives evaluated
-#' on \emph{m} gain critera.
+#' on \emph{m} gain criteria.
 #' @param nrClasses Number of classes.
-#' @param strictVF \code{TRUE} for strictly increasing maginal value functions,
-#' \code{FALSE} for monotonously increasing.
+#' @param strictVF \code{TRUE} for strictly monotonic marginal value functions,
+#' \code{FALSE} for weakly monotonic.
 #' @param criteria A vector containing type of each criterion (\code{'g'} - gain, \code{'c'} - cost).
 #' @param characteristicPoints A vector of integers that for each criterion contains number of characteristic points
 #' or \emph{0} for general marginal value function.
@@ -125,7 +125,7 @@ addAssignmentsLB <- function(problem, ...) {
 #' given an assignment of an alternative \emph{a_i} will be removed regardless of class.
 #' If a specific assignment was not found nothing will happen.
 #' 
-#' @return Problem with removed assigmnent examples.
+#' @return Problem with removed assignment examples.
 #' 
 #' @examples
 #' # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing
@@ -238,7 +238,7 @@ addAssignmentsUB <- function(problem, ...) {
 #' given an assignment of an alternative \emph{a_i} will be removed regardless of class.
 #' If a specific assignment was not found nothing will happen.
 #' 
-#' @return Problem with removed assigmnent examples.
+#' @return Problem with removed assignment examples.
 #' 
 #' @examples
 #' # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing
@@ -287,7 +287,7 @@ removeAssignmentsUB <- function(problem, ...) {
 
 #' Add assignment pairwise \emph{at least} comparisons
 #'
-#' The comparison of a pair of alternatives may indicate that \emph{a_i} shoud
+#' The comparison of a pair of alternatives may indicate that \emph{a_i} should
 #' be assigned to a class at least as good as class of \emph{a_j} or at least
 #' better by \emph{k} classes. The function \code{assignmentPairwiseAtLeastComparisons}
 #' allows to define such pairwise comparisons.
@@ -417,7 +417,7 @@ removeAssignmentPairwiseAtLeastComparisons <- function(problem, ...) {
 #' Add assignment pairwise \emph{at most} comparisons
 #'
 #' The comparison of a pair of alternatives may indicate that alternative
-#' \emph{a_i} shoud be assigned to a class at most better by \emph{k} classes
+#' \emph{a_i} should be assigned to a class at most better by \emph{k} classes
 #' then class of \emph{a_j}. The function \code{assignmentPairwiseAtMostComparisons}
 #' allows to define such pairwise comparisons.
 #' 
@@ -594,7 +594,7 @@ addMinimalClassCardinalities <- function(problem, ...) {
 
 #' Remove minimal class cardinality restrictions
 #'
-#' This function allows to remvove defined minimal cardinality of particular classes.
+#' This function allows to remove defined minimal cardinality of particular classes.
 #'
 #' @param problem Problem from which preference information will be removed.
 #' @param ... Two-element vectors and/or integers.
@@ -708,7 +708,7 @@ addMaximalClassCardinalities <- function(problem, ...) {
 
 #' Remove maximal class cardinality restrictions
 #'
-#' This function allows to remvove defined maximal cardinality of particular classes.
+#' This function allows to remove defined maximal cardinality of particular classes.
 #'
 #' @param problem Problem from which preference information will be removed.
 #' @param ... Two-element vectors and/or integers.

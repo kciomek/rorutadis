@@ -2,7 +2,7 @@
 \alias{removeMinimalClassCardinalities}
 \title{Remove minimal class cardinality restrictions}
 \usage{
-  removeMinimalClassCardinalities(problem, ...)
+removeMinimalClassCardinalities(problem, ...)
 }
 \arguments{
   \item{problem}{Problem from which preference information
@@ -18,11 +18,11 @@
   found nothing will happen.}
 }
 \value{
-  Problem with removed preference information.
+Problem with removed preference information.
 }
 \description{
-  This function allows to remvove defined minimal
-  cardinality of particular classes.
+This function allows to remove defined minimal cardinality
+of particular classes.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing

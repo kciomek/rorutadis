@@ -2,7 +2,7 @@
 \alias{mergeAssignments}
 \title{Merge different assignments}
 \usage{
-  mergeAssignments(assignmentList, necessary)
+mergeAssignments(assignmentList, necessary)
 }
 \arguments{
   \item{assignmentList}{List of assignment matrices
@@ -12,31 +12,30 @@
   \item{necessary}{Whether necessary or possible merging.}
 }
 \value{
-  \emph{n} x \emph{p} logical matrix, where each row
-  represents one of \emph{n} alternatives and each column
-  represents one of \emph{p} classes. Element \code{[i, h]}
-  is \code{TRUE} if alternative \code{a_i} can be assigned
-  to class \code{C_h}.
+\emph{n} x \emph{p} logical matrix, where each row
+represents one of \emph{n} alternatives and each column
+represents one of \emph{p} classes. Element \code{[i, h]}
+is \code{TRUE} if alternative \code{a_i} can be assigned to
+class \code{C_h}.
 }
 \description{
-  This function allows to merge different assignments, e.g.
-  from various decision makers (group result, group
-  assignment). There are four types of group assignments:
-  \itemize{ \item \strong{P}ossible \strong{P}ossible -
-  alternative \emph{a_i} is \strong{possibly} in class
-  \emph{C_h} \strong{for at least one} decision maker,
-  \item \strong{P}ossible \strong{N}ecessary - alternative
-  \emph{a_i} is \strong{possibly} in class \emph{C_h}
-  \strong{for all} decision makers, \item
-  \strong{N}ecessary \strong{P}ossible - alternative
-  \emph{a_i} is \strong{necessarily} in class \emph{C_h}
-  \strong{for at least one} decision maker, \item
-  \strong{N}ecessary \strong{N}ecessary - alternative
-  \emph{a_i} is \strong{necessarily} in class \emph{C_h}
-  \strong{for all} decision makers. } The first
-  possible-necessary parameter depends on decision makers'
-  assignemnts computed earlier, and the second is define as
-  function's parameter.
+This function allows to merge different assignments, e.g.
+from various decision makers (group result, group
+assignment). There are four types of group assignments:
+\itemize{ \item \strong{P}ossible \strong{P}ossible -
+alternative \emph{a_i} is \strong{possibly} in class
+\emph{C_h} \strong{for at least one} decision maker, \item
+\strong{P}ossible \strong{N}ecessary - alternative
+\emph{a_i} is \strong{possibly} in class \emph{C_h}
+\strong{for all} decision makers, \item \strong{N}ecessary
+\strong{P}ossible - alternative \emph{a_i} is
+\strong{necessarily} in class \emph{C_h} \strong{for at
+least one} decision maker, \item \strong{N}ecessary
+\strong{N}ecessary - alternative \emph{a_i} is
+\strong{necessarily} in class \emph{C_h} \strong{for all}
+decision makers. } The first possible-necessary parameter
+depends on decision makers assignments computed earlier,
+and the second is define as function parameter.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
@@ -53,6 +52,6 @@ assignmentList[[2]] <- calculateAssignments(DM2Problem, necessary)
 PNAssignments <- mergeAssignments(assignmentList, TRUE)
 }
 \seealso{
-  \code{\link{calculateAssignments}}
+\code{\link{calculateAssignments}}
 }
 

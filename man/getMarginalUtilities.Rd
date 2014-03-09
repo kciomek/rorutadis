@@ -2,7 +2,7 @@
 \alias{getMarginalUtilities}
 \title{Get marginal utilities}
 \usage{
-  getMarginalUtilities(problem, solution)
+getMarginalUtilities(problem, solution)
 }
 \arguments{
   \item{problem}{Problem whose model was solved.}
@@ -12,12 +12,12 @@
   \code{\link{investigateUtility}}).}
 }
 \value{
-  A \emph{n} x \emph{m} matrix containing marginal values
-  of \code{n} alternatives on \code{m} criteria.
+A \emph{n} x \emph{m} matrix containing marginal values of
+\code{n} alternatives on \code{m} criteria.
 }
 \description{
-  This funciton extracts alternatives marginal values from
-  model solution.
+This function extracts alternatives marginal values from
+model solution.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
@@ -28,10 +28,10 @@ representativeFunction <- findRepresentativeFunction(problem, 0)
 marginalUtilities <- getMarginalUtilities(problem, representativeFunction)
 }
 \seealso{
-  \code{\link{findRepresentativeFunction}}
-  \code{\link{getAssignments}}
-  \code{\link{getCharacteristicPoints}}
-  \code{\link{getThresholds}}
-  \code{\link{investigateUtility}}
+\code{\link{findRepresentativeFunction}}
+\code{\link{getAssignments}}
+\code{\link{getCharacteristicPoints}}
+\code{\link{getThresholds}}
+\code{\link{investigateUtility}}
 }
 

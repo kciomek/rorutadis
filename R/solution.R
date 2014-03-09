@@ -21,7 +21,7 @@ isModelConsistent <- function(model, epsilonIndex) {
 
 #' Get thresholds
 #'
-#' This funciton extracts values of thresholds from model solution.
+#' This function extracts values of thresholds from model solution.
 #' 
 #' @param problem Problem whose model was solved.
 #' @param solution Result of model solving (e.g. result of
@@ -51,7 +51,7 @@ getThresholds <- function(problem, solution) {
 
 #' Get marginal utilities
 #'
-#' This funciton extracts alternatives marginal values from model solution.
+#' This function extracts alternatives marginal values from model solution.
 #' 
 #' @param problem Problem whose model was solved.
 #' @param solution Result of model solving (e.g. result of
@@ -96,13 +96,13 @@ getMarginalUtilities <- function(problem, solution) {
 
 #' Get characteristic points
 #'
-#' This funciton extracts values of characteristic points from model solution.
+#' This function extracts values of characteristic points from model solution.
 #' 
 #' @param problem Problem whose model was solved.
 #' @param solution Result of model solving (e.g. result of
 #' \code{\link{findRepresentativeFunction}} or \code{\link{investigateUtility}}).
 #' @return List of \code{m} matrices for each of \code{m} criteria.
-#' Each row \code{c(g, u)} of each matrix contains coordinates of a signgle
+#' Each row \code{c(g, u)} of each matrix contains coordinates of a single
 #' characteristic point, where \code{g} - evaluation on corresponding criterion,
 #' \code{u} - marginal utility.
 #' @seealso
@@ -182,7 +182,7 @@ getCharacteristicPoints <- function(problem, solution) {
 
 #' Get assignments
 #'
-#' This funciton returns assignments for given model solution.
+#' This function returns assignments for given model solution.
 #' 
 #' @param problem Problem whose model was solved.
 #' @param solution Result of model solving (e.g. result of

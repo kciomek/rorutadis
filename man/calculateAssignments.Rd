@@ -2,7 +2,7 @@
 \alias{calculateAssignments}
 \title{Calculate assignments}
 \usage{
-  calculateAssignments(problem, necessary)
+calculateAssignments(problem, necessary)
 }
 \arguments{
   \item{problem}{Problem for which assignments will be
@@ -12,18 +12,18 @@
   assignments.}
 }
 \value{
-  \emph{n} x \emph{p} logical matrix, where each row
-  represents one of \emph{n} alternatives and each column
-  represents one of \emph{p} classes. Element \code{[i, h]}
-  is \code{TRUE} if: \itemize{ \item for necessary
-  assignments: alternative \code{a_i} is always assigned to
-  class \code{C_h}, \item for possible assignments:
-  alternative \code{a_i} can be assigned to class
-  \code{C_h}. }
+\emph{n} x \emph{p} logical matrix, where each row
+represents one of \emph{n} alternatives and each column
+represents one of \emph{p} classes. Element \code{[i, h]}
+is \code{TRUE} if: \itemize{ \item for necessary
+assignments: alternative \code{a_i} is always assigned to
+class \code{C_h}, \item for possible assignments:
+alternative \code{a_i} can be assigned to class \code{C_h}.
+}
 }
 \description{
-  This function calculates possible and necessary
-  assignments.
+This function calculates possible and necessary
+assignments.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)

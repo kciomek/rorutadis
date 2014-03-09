@@ -2,7 +2,7 @@
 \alias{explainAssignment}
 \title{Explain assignment}
 \usage{
-  explainAssignment(alternative, classInterval, problem)
+explainAssignment(alternative, classInterval, problem)
 }
 \arguments{
   \item{alternative}{Index of an alternative.}
@@ -15,23 +15,22 @@
   performed.}
 }
 \value{
-  List of all preferential reducts for an assignment
-  relation or \code{NULL} if an assignment is not infuenced
-  by restrictions. Each element of that list is a
-  preferential reduct represended as a vector of
-  restriction indices. To identify preferencial core use
-  \code{\link{getPreferentialCore}}. To find out about
-  restrictions by their indices use
-  \code{\link{getRestrictions}}. If there was not possible
-  to find explanations the function will return
-  \code{NULL}.
+List of all preferential reducts for an assignment relation
+or \code{NULL} if an assignment is not influenced by
+restrictions. Each element of that list is a preferential
+reduct represented as a vector of restriction indices. To
+identify preferential core use
+\code{\link{getPreferentialCore}}. To find out about
+restrictions by their indices use
+\code{\link{getRestrictions}}. If there was not possible to
+find explanations the function will return \code{NULL}.
 }
 \description{
-  This function allows to obtain explenation of an
-  alternative assignment to a specific class interval or
-  one class in case if assignment is necessary. The
-  function returns all preferential reducts for an
-  assignment relation.
+This function allows to obtain explanation of an
+alternative assignment to a specific class interval or one
+class in case if assignment is necessary. The function
+returns all preferential reducts for an assignment
+relation.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.5), ncol = 2)
@@ -49,8 +48,8 @@ preferentialCore <- getPreferentialCore(preferentialReducts)
 coreRestrictions <- getRestrictions(problem, preferentialCore)
 }
 \seealso{
-  \code{\link{getPreferentialCore}}
-  \code{\link{getRestrictions}}
-  \code{\link{calculateAssignments}}
+\code{\link{getPreferentialCore}}
+\code{\link{getRestrictions}}
+\code{\link{calculateAssignments}}
 }
 

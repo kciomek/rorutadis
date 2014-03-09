@@ -2,7 +2,7 @@
 \alias{addMaximalClassCardinalities}
 \title{Add maximal class cardinality restrictions}
 \usage{
-  addMaximalClassCardinalities(problem, ...)
+addMaximalClassCardinalities(problem, ...)
 }
 \arguments{
   \item{problem}{Problem to which preference information
@@ -13,11 +13,11 @@
   of class \emph{C_i}.}
 }
 \value{
-  Problem with added preference information.
+Problem with added preference information.
 }
 \description{
-  This function allows to define maximal cardinality of
-  particular classes.
+This function allows to define maximal cardinality of
+particular classes.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing
@@ -31,7 +31,7 @@ problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
 problem <- addMaximalClassCardinalities(problem, c(2, 2), c(3, 1))
 }
 \seealso{
-  \code{\link{buildProblem}}
-  \code{\link{removeMaximalClassCardinalities}}
+\code{\link{buildProblem}}
+\code{\link{removeMaximalClassCardinalities}}
 }
 

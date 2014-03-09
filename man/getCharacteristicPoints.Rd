@@ -2,7 +2,7 @@
 \alias{getCharacteristicPoints}
 \title{Get characteristic points}
 \usage{
-  getCharacteristicPoints(problem, solution)
+getCharacteristicPoints(problem, solution)
 }
 \arguments{
   \item{problem}{Problem whose model was solved.}
@@ -12,15 +12,15 @@
   \code{\link{investigateUtility}}).}
 }
 \value{
-  List of \code{m} matrices for each of \code{m} criteria.
-  Each row \code{c(g, u)} of each matrix contains
-  coordinates of a signgle characteristic point, where
-  \code{g} - evaluation on corresponding criterion,
-  \code{u} - marginal utility.
+List of \code{m} matrices for each of \code{m} criteria.
+Each row \code{c(g, u)} of each matrix contains coordinates
+of a single characteristic point, where \code{g} -
+evaluation on corresponding criterion, \code{u} - marginal
+utility.
 }
 \description{
-  This funciton extracts values of characteristic points
-  from model solution.
+This function extracts values of characteristic points from
+model solution.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
@@ -31,10 +31,10 @@ representativeFunction <- findRepresentativeFunction(problem, 0)
 characteristicPoints <- getCharacteristicPoints(problem, representativeFunction)
 }
 \seealso{
-  \code{\link{findRepresentativeFunction}}
-  \code{\link{getAssignments}}
-  \code{\link{getMarginalUtilities}}
-  \code{\link{getThresholds}}
-  \code{\link{investigateUtility}}
+\code{\link{findRepresentativeFunction}}
+\code{\link{getAssignments}}
+\code{\link{getMarginalUtilities}}
+\code{\link{getThresholds}}
+\code{\link{investigateUtility}}
 }
 

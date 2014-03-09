@@ -2,7 +2,7 @@
 \alias{removeAssignmentPairwiseAtMostComparisons}
 \title{Remove assignment pairwise \emph{at most} comparisons}
 \usage{
-  removeAssignmentPairwiseAtMostComparisons(problem, ...)
+removeAssignmentPairwiseAtMostComparisons(problem, ...)
 }
 \arguments{
   \item{problem}{Problem from which preference information
@@ -18,12 +18,12 @@
   comparison was not found nothing will happen.}
 }
 \value{
-  Problem with removed comparisons.
+Problem with removed comparisons.
 }
 \description{
-  This function removes pairwise \emph{at most}
-  comparisons. For more information see
-  \code{addPairwiseAtMostComparisons}.
+This function removes pairwise \emph{at most} comparisons.
+For more information see
+\code{addPairwiseAtMostComparisons}.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing

@@ -2,7 +2,7 @@
 \alias{getThresholds}
 \title{Get thresholds}
 \usage{
-  getThresholds(problem, solution)
+getThresholds(problem, solution)
 }
 \arguments{
   \item{problem}{Problem whose model was solved.}
@@ -12,13 +12,13 @@
   \code{\link{investigateUtility}}).}
 }
 \value{
-  Vector containing \code{h-1} thresholds from \code{t_1}
-  to \code{t_h-1} where \code{t_p-1} is lower threshold of
-  class \code{C_p} and \code{h} is number of classes.
+Vector containing \code{h-1} thresholds from \code{t_1} to
+\code{t_h-1} where \code{t_p-1} is lower threshold of class
+\code{C_p} and \code{h} is number of classes.
 }
 \description{
-  This funciton extracts values of thresholds from model
-  solution.
+This function extracts values of thresholds from model
+solution.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
@@ -29,10 +29,10 @@ representativeFunction <- findRepresentativeFunction(problem, 0)
 thresholds <- getThresholds(problem, representativeFunction)
 }
 \seealso{
-  \code{\link{findRepresentativeFunction}}
-  \code{\link{getAssignments}}
-  \code{\link{getCharacteristicPoints}}
-  \code{\link{getMarginalUtilities}}
-  \code{\link{investigateUtility}}
+\code{\link{findRepresentativeFunction}}
+\code{\link{getAssignments}}
+\code{\link{getCharacteristicPoints}}
+\code{\link{getMarginalUtilities}}
+\code{\link{investigateUtility}}
 }
 

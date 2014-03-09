@@ -2,7 +2,7 @@
 \alias{getAssignments}
 \title{Get assignments}
 \usage{
-  getAssignments(problem, solution)
+getAssignments(problem, solution)
 }
 \arguments{
   \item{problem}{Problem whose model was solved.}
@@ -12,13 +12,12 @@
   \code{\link{investigateUtility}}).}
 }
 \value{
-  Vector of alternative assignments. Each element contains
-  an index of a class that corresponding alternative was
-  assigned to.
+Vector of alternative assignments. Each element contains an
+index of a class that corresponding alternative was
+assigned to.
 }
 \description{
-  This funciton returns assignments for given model
-  solution.
+This function returns assignments for given model solution.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
@@ -29,10 +28,10 @@ representativeFunction <- findRepresentativeFunction(problem, 0)
 assignments <- getAssignments(problem, representativeFunction)
 }
 \seealso{
-  \code{\link{findRepresentativeFunction}}
-  \code{\link{getCharacteristicPoints}}
-  \code{\link{getMarginalUtilities}}
-  \code{\link{getThresholds}}
-  \code{\link{investigateUtility}}
+\code{\link{findRepresentativeFunction}}
+\code{\link{getCharacteristicPoints}}
+\code{\link{getMarginalUtilities}}
+\code{\link{getThresholds}}
+\code{\link{investigateUtility}}
 }
 

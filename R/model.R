@@ -844,7 +844,7 @@ buildBaseModel <- function(problem,
 #' indices.
 #' @param constraintIntervalIndices Vector of interval indices of each restriction
 #' constraints. c(a_1, b_1, ..., a_n, b_n), where i-th of n restrictions is represented as
-#' model constraints at indices between a_i and b_i includeing a_i, b_i.
+#' model constraints at indices between a_i and b_i including a_i, b_i.
 #' @param restrictionToRemoveIndices Vector of indices of restrictions to remove.
 #' @return Vector of model constraints of restrictions which are NOT in restrictionToRemoveIndices.
 removeConstraintsByRestrictions <- function(constraintIntervalIndices, restrictionToRemoveIndices) {

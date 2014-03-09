@@ -2,18 +2,18 @@
 \alias{improveAssignment}
 \title{Post factum analysis: improve assignment}
 \usage{
-  improveAssignment(alternative, atLeastToClass,
-    criteriaManipulability, necessary, problem)
+improveAssignment(alternative, atLeastToClass, criteriaManipulability,
+  necessary, problem)
 }
 \arguments{
-  \item{alternative}{An alternative for assignent
+  \item{alternative}{An alternative for assignment
   improvement.}
 
   \item{atLeastToClass}{Desired assignment.}
 
   \item{criteriaManipulability}{Vector containing a logical
   value for each criterion. Each value denotes whether
-  multipling by \code{rho} on corresponding criterion is
+  multiplying by \code{rho} on corresponding criterion is
   allowed or not. At least one criterion has to be
   available for that manipulation.}
 
@@ -24,16 +24,16 @@
   performed.}
 }
 \value{
-  Value of \code{rho} or \code{NULL} if given assignment is
-  not possible in any scenario.
+Value of \code{rho} or \code{NULL} if given assignment is
+not possible in any scenario.
 }
 \description{
-  This function calculates minimal \code{rho} by which
-  alternative evaluations on selected criteria have to be
-  multiplied for that alternative to be possibly (or
-  necessarily) assigned to at least some specific class
-  (\code{rho >= 1}). \strong{Note!} This function works for
-  problems with only positive alternative evaluations.
+This function calculates minimal \code{rho} by which
+alternative evaluations on selected criteria have to be
+multiplied for that alternative to be possibly (or
+necessarily) assigned to at least some specific class
+(\code{rho >= 1}). \strong{Note!} This function works for
+problems with only positive alternative evaluations.
 }
 \examples{
 perf <- matrix(c(8, 2, 1, 7, 0.5, 0.9, 0.4, 0.5), ncol = 2)
@@ -46,6 +46,6 @@ problem <- addAssignmentsUB(problem, c(1, 2), c(2, 3))
 rho <- improveAssignment(4, 3, c(TRUE, TRUE), FALSE, problem)
 }
 \seealso{
-  \code{\link{deteriorateAssignment}}
+\code{\link{deteriorateAssignment}}
 }
 

@@ -2,7 +2,7 @@
 \alias{addAssignmentsUB}
 \title{Add upper bound of alternative possible assignments}
 \usage{
-  addAssignmentsUB(problem, ...)
+addAssignmentsUB(problem, ...)
 }
 \arguments{
   \item{problem}{Problem to which preference information
@@ -14,11 +14,11 @@
   \emph{C_j}.}
 }
 \value{
-  Problem with added assignment examples.
+Problem with added assignment examples.
 }
 \description{
-  This function adds upper bounds of possible assignments
-  to a problem.
+This function adds upper bounds of possible assignments to
+a problem.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing
@@ -31,7 +31,7 @@ problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
 problem <- addAssignmentsUB(problem, c(3, 1), c(4, 2))
 }
 \seealso{
-  \code{\link{buildProblem}}
-  \code{\link{removeAssignmentsUB}}
+\code{\link{buildProblem}}
+\code{\link{removeAssignmentsUB}}
 }
 

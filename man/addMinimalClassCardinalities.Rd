@@ -2,7 +2,7 @@
 \alias{addMinimalClassCardinalities}
 \title{Add minimal class cardinality restrictions}
 \usage{
-  addMinimalClassCardinalities(problem, ...)
+addMinimalClassCardinalities(problem, ...)
 }
 \arguments{
   \item{problem}{Problem to which preference information
@@ -13,11 +13,11 @@
   of class \emph{C_i}.}
 }
 \value{
-  Problem with added preference information.
+Problem with added preference information.
 }
 \description{
-  This function allows to define minimal cardinality of
-  particular classes.
+This function allows to define minimal cardinality of
+particular classes.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing
@@ -31,7 +31,7 @@ problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
 problem <- addMinimalClassCardinalities(problem, c(2, 1), c(3, 1))
 }
 \seealso{
-  \code{\link{buildProblem}}
-  \code{\link{removeMinimalClassCardinalities}}
+\code{\link{buildProblem}}
+\code{\link{removeMinimalClassCardinalities}}
 }
 

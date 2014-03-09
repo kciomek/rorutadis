@@ -2,7 +2,7 @@
 \alias{addAssignmentPairwiseAtLeastComparisons}
 \title{Add assignment pairwise \emph{at least} comparisons}
 \usage{
-  addAssignmentPairwiseAtLeastComparisons(problem, ...)
+addAssignmentPairwiseAtLeastComparisons(problem, ...)
 }
 \arguments{
   \item{problem}{Problem to which preference information
@@ -15,15 +15,15 @@
   \emph{a_j}.}
 }
 \value{
-  Problem with added comparisons.
+Problem with added comparisons.
 }
 \description{
-  The comparison of a pair of alternatives may indicate
-  that \emph{a_i} shoud be assigned to a class at least as
-  good as class of \emph{a_j} or at least better by
-  \emph{k} classes. The function
-  \code{assignmentPairwiseAtLeastComparisons} allows to
-  define such pairwise comparisons.
+The comparison of a pair of alternatives may indicate that
+\emph{a_i} should be assigned to a class at least as good
+as class of \emph{a_j} or at least better by \emph{k}
+classes. The function
+\code{assignmentPairwiseAtLeastComparisons} allows to
+define such pairwise comparisons.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing
@@ -39,7 +39,7 @@ problem <- addAssignmentPairwiseAtLeastComparisons(problem,
    c(4, 3, 1), c(2, 1, 0))
 }
 \seealso{
-  \code{\link{buildProblem}}
-  \code{\link{removeAssignmentPairwiseAtLeastComparisons}}
+\code{\link{buildProblem}}
+\code{\link{removeAssignmentPairwiseAtLeastComparisons}}
 }
 

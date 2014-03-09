@@ -2,8 +2,8 @@
 \alias{drawUtilityPlots}
 \title{Draw marginal value functions and chart of alternative utilities}
 \usage{
-  drawUtilityPlots(problem, solution, printLabels = TRUE,
-    criteria = NULL, plotsPerRow = 2, descending = NULL)
+drawUtilityPlots(problem, solution, printLabels = TRUE, criteria = NULL,
+  plotsPerRow = 2, descending = NULL)
 }
 \arguments{
   \item{problem}{Problem whose model was solved.}
@@ -32,11 +32,11 @@
   sorted ascending by value of utility. }}
 }
 \value{
-  Plot.
+Plot.
 }
 \description{
-  This function draws marginal value functions and
-  alternative utilities chart.
+This function draws marginal value functions and
+alternative utilities chart.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
@@ -47,7 +47,7 @@ representativeFunction <- findRepresentativeFunction(problem, 0)
 drawUtilityPlots(problem, representativeFunction)
 }
 \seealso{
-  \code{\link{findRepresentativeFunction}}
-  \code{\link{investigateUtility}}
+\code{\link{findRepresentativeFunction}}
+\code{\link{investigateUtility}}
 }
 

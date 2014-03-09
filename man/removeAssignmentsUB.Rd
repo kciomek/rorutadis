@@ -2,7 +2,7 @@
 \alias{removeAssignmentsUB}
 \title{Remove upper bound of alternative possible assignments}
 \usage{
-  removeAssignmentsUB(problem, ...)
+removeAssignmentsUB(problem, ...)
 }
 \arguments{
   \item{problem}{Problem from which preference information
@@ -18,11 +18,11 @@
   not found nothing will happen.}
 }
 \value{
-  Problem with removed assigmnent examples.
+Problem with removed assignment examples.
 }
 \description{
-  This function removes upper bounds of possible
-  assignments from a problem.
+This function removes upper bounds of possible assignments
+from a problem.
 }
 \examples{
 # 4 alternatives, 2 gain criteria, 3 classes, monotonously increasing

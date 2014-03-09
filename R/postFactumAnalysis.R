@@ -51,7 +51,7 @@ isModelConsistentForRho <- function(alternative, atLeastToClass, criteria, neces
 #' criteria by value \code{rho} (where \code{0 < rho <= 1}). 
 #' \strong{Note!} This function works for problems with only positive
 #' alternative evaluations.
-#' @param alternative An alternative for assignent deterioration.
+#' @param alternative An alternative for assignment deterioration.
 #' @param atLeastToClass An assignment to investigate.
 #' @param criteriaManipulability Vector containing a logical value for each criterion.
 #' Each value denotes whether multiplying by \code{rho} on corresponding criterion is allowed or not.
@@ -167,7 +167,7 @@ deteriorateAssignment <- function(alternative,
 #' (\code{rho >= 1}). 
 #' \strong{Note!} This function works for problems with only positive
 #' alternative evaluations.
-#' @param alternative An alternative for assignent improvement.
+#' @param alternative An alternative for assignment improvement.
 #' @param atLeastToClass Desired assignment.
 #' @param criteriaManipulability Vector containing a logical value for each criterion.
 #' Each value denotes whether multiplying by \code{rho} on corresponding criterion is allowed or not.
@@ -278,7 +278,7 @@ improveAssignment <- function(alternative,
 
 #' Post factum analysis: check how much utility is missing
 #'
-#' This funciton calculates missing value of an alternative utility for
+#' This function calculates missing value of an alternative utility for
 #' that alternative to be possibly (or necessarily) assigned to at least some
 #' specific class.
 #' 
