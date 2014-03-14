@@ -353,7 +353,10 @@ buildMonotonousThresholdsConstraints <- function(nrVars, firstThresholdIndex,
     res <- rbind(res, lhs)
   }
   
-  return (list(lhs = res, dir = rep(">=", nrow(res)), rhs = rep(0, nrow(res))))
+  if (is.null(res))
+    return (NULL)
+  else
+    return (list(lhs = res, dir = rep(">=", nrow(res)), rhs = rep(0, nrow(res))))
 }
 
 ###### ASSIGNEMNT EXAMPLES
