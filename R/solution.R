@@ -205,20 +205,15 @@ getCharacteristicPoints <- function(problem, solution) {
 #' @export
 getAssignments <- function(problem, solution) {
   nrAlternatives  = nrow(problem$perf)
-  altVars <- buildAltVariableMatrix(problem$perf)
   assignments <- array(dim = nrAlternatives)
-  thresholds <- getThresholds(problem, solution)
+  firstClAssgnBinVarIndex <- getFirstClAsgnBinVarIndex(problem)
   
   for (i in seq_len(nrAlternatives)) {
-    for (h in seq_len(length(thresholds))) {
-      if (sum(altVars[i,] * solution$solution[1:ncol(altVars)]) < thresholds[h]) {
-        assignments[i] = h
+    for (j in seq_len(problem$nrClasses)) {
+      if (solution$solution[firstClAssgnBinVarIndex + (i - 1) * problem$nrClasses + j - 1] > 0.5) {
+        assignments[i] = j
         break
       }
-    }
-    
-    if (is.na(assignments[i])) {
-      assignments[i] = problem$nrClasses
     }
   }
   
