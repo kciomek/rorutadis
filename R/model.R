@@ -271,7 +271,7 @@ buildMonotonousAndCharacteristicPointsConstraints <- function(perf,
               resDir <- c(resDir, "==")
               resRhs <- c(resRhs, 0)
               
-              break;
+              break
             }
           }
         }
@@ -308,7 +308,7 @@ buildMonotonousAndCharacteristicPointsConstraints <- function(perf,
               resDir <- c(resDir, "==")
               resRhs <- c(resRhs, 0)
               
-              break;
+              break
             }
           }
         }
@@ -715,7 +715,7 @@ buildBaseModel <- function(problem,
                                                       altVars,
                                                       firstThresholdIndex,
                                                       lastThresholdIndex)
-      allConst <- combineConstraints(allConst, assignmentConst);
+      allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs), nrow(allConst$lhs))
     }
   }
@@ -728,7 +728,7 @@ buildBaseModel <- function(problem,
                                                       firstThresholdIndex,
                                                       lastThresholdIndex,
                                                       epsilonIndex)
-      allConst <- combineConstraints(allConst, assignmentConst);
+      allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs), nrow(allConst$lhs))
     }
   }
@@ -754,7 +754,7 @@ buildBaseModel <- function(problem,
                                                                               firstBinaryVarIndex,
                                                                               epsilonIndex)
       
-      allConst <- combineConstraints(allConst, assignmentConst);
+      allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs))
     }
   }
@@ -778,7 +778,7 @@ buildBaseModel <- function(problem,
                                                                              firstBinaryVarIndex,
                                                                              epsilonIndex)
       
-      allConst <- combineConstraints(allConst, assignmentConst);
+      allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs))
     }
   }
@@ -803,7 +803,7 @@ buildBaseModel <- function(problem,
                                                                 firstBinaryVarIndex,
                                                                 epsilonIndex)
     
-    allConst <- combineConstraints(allConst, assignmentConst);
+    allConst <- combineConstraints(allConst, assignmentConst)
   }
   
   
@@ -815,7 +815,7 @@ buildBaseModel <- function(problem,
                                                             problem$nrClasses,
                                                             firstIndex)
       
-      allConst <- combineConstraints(allConst, assignmentConst);
+      allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs), nrow(allConst$lhs))
     }
   }
@@ -828,7 +828,7 @@ buildBaseModel <- function(problem,
                                                             problem$nrClasses,
                                                             firstIndex)
       
-      allConst <- combineConstraints(allConst, assignmentConst);
+      allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs), nrow(allConst$lhs))
     }
   }
