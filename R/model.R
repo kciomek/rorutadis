@@ -214,6 +214,24 @@ buildMonotonousAndCharacteristicPointsConstraints <- function(perf,
     }
     else {
       # monotonous of characteristic points
+      
+      lhs <- array(0, dim = nrOutputVars)
+      
+      if (criteria[i] == 'g') {
+        lhs[firstCharacteristicPointIndex] <- 1
+      }
+      else {
+        lhs[firstCharacteristicPointIndex + linearSegments[i] - 1] <- 1
+      }
+      
+      if (strictVF == TRUE) {
+        lhs[epsilonIndex] <- -1
+      }
+      
+      resDir <- c(resDir, ">=")
+      resLhs <- rbind(resLhs, lhs)
+      resRhs <- c(resRhs, 0)
+      
       if (linearSegments[i] > 1) {
         for (k in 0:(linearSegments[i]-2)) {
           lhs <- array(0, dim = nrOutputVars)
