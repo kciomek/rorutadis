@@ -1,5 +1,6 @@
 #### SOLVING MODEL
 
+#' @import Rglpk
 extremizeVariable <- function(model, variableIndex, maximize) {
   obj <- rep(0, ncol(model$lhs))
   obj[variableIndex] <- 1  

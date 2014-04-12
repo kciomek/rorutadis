@@ -7,6 +7,6 @@ Author: Krzysztof Ciomek
 Maintainer: Krzysztof Ciomek <k.ciomek@gmail.com>
 URL: https://github.com/kciomek/rorutadis/
 Depends: Rglpk (>= 0.5-1), ggplot2 (>= 0.9.3.1), gridExtra (>= 0.9.1)
-Description: This package contains an implementation of Robust Ordinal Regression for value-based sorting with some extensions and additional tools. It is a novel Multiple-Criteria Decision Aiding (MCDA) framework.
+Description: Implementation of Robust Ordinal Regression for value-based sorting with some extensions and additional tools. It is a novel Multiple-Criteria Decision Aiding (MCDA) framework.
 License: GPL-3
 Suggests: testthat (>= 0.7.1)

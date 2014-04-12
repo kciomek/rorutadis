@@ -6,7 +6,7 @@
 Robust Ordinal Regression UTADIS
 }
 \description{
-This package contains an implementation of Robust Ordinal Regression for
+Implementation of Robust Ordinal Regression for
 value-based sorting with some extensions and additional tools. It is a
 novel Multiple-Criteria Decision Aiding (MCDA) framework.
 }

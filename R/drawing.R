@@ -33,6 +33,8 @@
 #' 
 #' representativeFunction <- findRepresentativeFunction(problem, 0)
 #' drawUtilityPlots(problem, representativeFunction)
+#' @import ggplot2
+#' @import gridExtra
 #' @export
 drawUtilityPlots <- function(problem, solution, printLabels = TRUE,
                              criteria = NULL, plotsPerRow = 2,
