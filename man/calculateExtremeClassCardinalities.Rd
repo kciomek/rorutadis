@@ -25,4 +25,8 @@ problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
 
 extremeClassCardinalities <- calculateExtremeClassCardinalities(problem)
 }
+\seealso{
+\code{\link{addMinimalClassCardinalities}}
+\code{\link{addMaximalClassCardinalities}}
+}
 

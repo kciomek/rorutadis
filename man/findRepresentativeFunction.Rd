@@ -2,7 +2,7 @@
 \alias{findRepresentativeFunction}
 \title{Find representative utility function}
 \usage{
-findRepresentativeFunction(problem, mode)
+findRepresentativeFunction(problem, mode, relation = NULL)
 }
 \arguments{
   \item{problem}{Problem to investigate.}
@@ -11,6 +11,11 @@ findRepresentativeFunction(problem, mode)
   computing representative utility function: \itemize{
   \item \code{0} - iterative mode, \item \code{1} -
   compromise mode. }}
+
+  \item{relation}{A matrix of assignment pairwise
+  comparisons. Can be provided if it has been calculated
+  earlier (with \code{\link{compareAssignments}}). If the
+  parameter is \code{NULL}, it will be computed.}
 }
 \value{
 This function returns a result of solving model of a

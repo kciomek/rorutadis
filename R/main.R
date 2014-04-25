@@ -244,7 +244,7 @@ compareAssignments <- function(problem, necessary = TRUE) {
 #' @return \emph{p} x \emph{2} matrix, where \emph{p} is the number of classes.
 #' Value at \code{[h, 1]} is a minimal possible cardinality of class \code{C_h},
 #' and value at \code{[h, 2]} is a maximal possible cardinality of class \code{C_h}.
-#' @seealso:
+#' @seealso
 #' \code{\link{addMinimalClassCardinalities}}
 #' \code{\link{addMaximalClassCardinalities}}
 #' @examples
@@ -364,6 +364,9 @@ mergeAssignments <- function(assignmentList, necessary) {
 #' \item \code{0} - iterative mode,
 #' \item \code{1} - compromise mode.
 #' }
+#' @param relation A matrix of assignment pairwise comparisons. Can be provided if
+#' it has been calculated earlier (with \code{\link{compareAssignments}}). If
+#' the parameter is \code{NULL}, it will be computed.
 #' @return This function returns a result of solving model of a problem. It can be
 #' used for further computations (e.g. \code{\link{getThresholds}},
 #' \code{\link{getMarginalUtilities}}, \code{\link{getCharacteristicPoints}}). If representative utility function was
@@ -380,10 +383,13 @@ mergeAssignments <- function(assignmentList, necessary) {
 #' representativeFunction <- findRepresentativeFunction(problem, 0)
 #' thresholds <- getThresholds(problem, representativeFunction)
 #' @export
-findRepresentativeFunction <- function(problem, mode) {
+findRepresentativeFunction <- function(problem, mode, relation = NULL) {
   stopifnot(mode == 0 || mode == 1)
   
-  relation <- compareAssignments(problem)
+  if (is.null(relation)) {
+    relation <- compareAssignments(problem)
+  }
+  
   model <- buildBaseModel(problem, TRUE)
   nrAlternatives <- nrow(problem$perf)
   altVars <- buildAltVariableMatrix(problem$perf)
