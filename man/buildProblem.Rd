@@ -6,8 +6,7 @@ buildProblem(perf, nrClasses, strictVF, criteria, characteristicPoints)
 }
 \arguments{
   \item{perf}{A \emph{n} x \emph{m} performance matrix of
-  \emph{n} alternatives evaluated on \emph{m} gain
-  criteria.}
+  \emph{n} alternatives evaluated on \emph{m} criteria.}
 
   \item{nrClasses}{Number of classes.}
 
