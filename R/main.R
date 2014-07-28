@@ -398,8 +398,8 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     # iterative mode
     
     deltaIndex <- ncol(model$lhs) + 1
-    gammaIndex <- ncol(model$lhs) + 2
-    model <- addVarialbesToModel(model, c("C", "C"))
+    gammaIndex <- ncol(model$lhs) + 3
+    model <- addVarialbesToModel(model, c("C", "C", "C", "C"))
     
     for (i in 1:(nrAlternatives - 1)) {
       for (j in (i + 1):nrAlternatives) {
@@ -407,27 +407,40 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
           #U(a_i) - U(a_j) >= delta
           newConstraint <- buildUtilityDifferenceConstraint(i, j, altVars, ncol(model$lhs))
           newConstraint[deltaIndex] <- -1
+          newConstraint[deltaIndex + 1] <- 1
           model <- combineConstraints(model, list(lhs = newConstraint, dir = ">=", rhs = 0))
         }
         else if (!relation[i, j] && relation[j, i]) {
           #U(a_j) - U(a_i) >= delta
           newConstraint <- buildUtilityDifferenceConstraint(j, i, altVars, ncol(model$lhs))
           newConstraint[deltaIndex] <- -1
+          newConstraint[deltaIndex + 1] <- 1
           model <- combineConstraints(model, list(lhs = newConstraint, dir = ">=", rhs = 0))
         }
       }
     }
     
-    solution <- extremizeVariable(model, deltaIndex, TRUE)
+    obj <- rep(0, ncol(model$lhs))
+    obj[deltaIndex] <- 1  
+    obj[deltaIndex + 1] <- -1 
+    solution <-  Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs,
+                                max = TRUE, types = model$types)
+    
     if (solution$status != 0) {
       return (NULL)
     }
     
+    if (solution$optimum < 0) {
+      warning(paste("Solution was found, but the optimization target is negative (", solution$optimum, ").", sep = ""))
+    }
+    
     newConstraint <- rep(0, ncol(model$lhs))
     newConstraint[deltaIndex] <- 1
+    newConstraint[deltaIndex + 1] <- -1
     model <- combineConstraints(model, list(lhs = newConstraint,
                                             dir = "==",
                                             rhs = solution$optimum))
+    # print (solution$optimum)
     
     for (i in 1:(nrAlternatives - 1)) {
       for (j in (i + 1):nrAlternatives) {
@@ -436,17 +449,28 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
           #U(a_j) - U(a_i) <= gamma
           newConstraint <- buildUtilityDifferenceConstraint(i, j, altVars, ncol(model$lhs))
           newConstraint[gammaIndex] <- -1
+          newConstraint[gammaIndex + 1] <- 1
           model <- combineConstraints(model, list(lhs = newConstraint, dir = "<=", rhs = 0))
           newConstraint <- buildUtilityDifferenceConstraint(j, i, altVars, ncol(model$lhs))
           newConstraint[gammaIndex] <- -1
+          newConstraint[gammaIndex + 1] <- 1
           model <- combineConstraints(model, list(lhs = newConstraint, dir = "<=", rhs = 0))
         }
       }
     }
     
-    solution <- extremizeVariable(model, gammaIndex, FALSE)
+    obj <- rep(0, ncol(model$lhs))
+    obj[gammaIndex] <- 1  
+    obj[gammaIndex + 1] <- -1 
+    solution <- Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs,
+                              max = FALSE, types = model$types)
+    
     if (solution$status != 0) {
       return (NULL)
+    }
+    
+    if (solution$optimum < 0) {
+      warning(paste("Solution was found, but the optimization target is negative (", solution$optimum, ").", sep = ""))
     }
     
     return (solution)
@@ -455,7 +479,7 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     # compromise mode
     
     deltaIndex <- ncol(model$lhs) + 1
-    model <- addVarialbesToModel(model, c("C"))
+    model <- addVarialbesToModel(model, c("C", "C"))
     altVars <- buildAltVariableMatrix(problem$perf)
     different <- c()
     similar <- c()
@@ -487,13 +511,23 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
                                                                   altVars,
                                                                   ncol(model$lhs))
         newConstraint[deltaIndex] <- -1
+        newConstraint[deltaIndex + 1] <- 1
         model <- combineConstraints(model, list(lhs = newConstraint, dir = ">=", rhs = 0))
       }
     }
     
-    solution <- extremizeVariable(model, deltaIndex, TRUE)
+    obj <- rep(0, ncol(model$lhs))
+    obj[deltaIndex] <- 1  
+    obj[deltaIndex + 1] <- -1 
+    solution <- Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs,
+                               max = TRUE, types = model$types)
+    
     if (solution$status != 0) {
       return (NULL)
+    }
+    
+    if (solution$optimum < 0) {
+      warning(paste("Solution was found, but the optimization target is negative (", solution$optimum, ").", sep = ""))
     }
     
     return (solution)
