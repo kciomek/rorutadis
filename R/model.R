@@ -661,7 +661,8 @@ removeConstraints <- function(allConst, constraintsToRemoveIndices) {
 
 buildBaseModel <- function(problem,
                            isEpsilonStrictyPositive = FALSE,
-                           instedOfModelReturnIndices = FALSE) {
+                           instedOfModelReturnIndices = FALSE,
+                           onlyExampleAssignments = FALSE) {
   altVars <- buildAltVariableMatrix(problem$perf)
   epsilonIndex <- ncol(altVars)
   nrAlternatives <- nrow(problem$perf)
@@ -748,6 +749,13 @@ buildBaseModel <- function(problem,
       allConst <- combineConstraints(allConst, assignmentConst)
       resrtictionsIndices <- c(resrtictionsIndices, nrow(allConst$lhs), nrow(allConst$lhs))
     }
+  }
+  
+  if (onlyExampleAssignments) {
+    if (instedOfModelReturnIndices)
+      return (resrtictionsIndices)
+    else
+      return (allConst)
   }
   
   # Constraints: pairwise comparisions

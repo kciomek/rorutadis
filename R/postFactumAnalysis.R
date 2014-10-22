@@ -332,7 +332,7 @@ improveAssignment <- function(alternative,
 #' \itemize{
 #' \item \code{ux} - value of missing utility,
 #' \item \code{solution} - result of solving model. It can be used for further
-#' computations (e.g. \code{\link{getThresholds}}, \code{\link{getMarginalUtilities}},
+#' computations (\code{\link{getAssignments}}, \code{\link{getThresholds}}, \code{\link{getMarginalUtilities}},
 #' \code{\link{getCharacteristicPoints}}).
 #' }
 #' \code{NULL} is returned if given assignment is not possible.
