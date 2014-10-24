@@ -767,7 +767,7 @@ removeMaximalClassCardinalities <- function(problem, ...) {
 
 #### GETTING RESTRICTIONS BY INDICES
 
-#' Get restrictions be indices for problem
+#' Get restrictions by indices
 #'
 #' This function gets restrictions by indices. 
 #'
