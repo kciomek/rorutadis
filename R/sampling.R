@@ -130,7 +130,8 @@ calculateStochasticResults <- function(problem, nrSamples = 100) {
   result$assignments <- result$assignments / producedSamples
   result$preferenceRelation <- result$preferenceRelation / producedSamples
   result$classCardinalities <- result$classCardinalities / producedSamples
-  
+  result$acceptanceRateOfSecondPhaseSampling <- producedSamples / allGeneratedSamples
+    
   return (result)
 }
 
@@ -139,19 +140,18 @@ extractSeparateVariables <- function(model) {
   values <- c()
   rowsToRemove <- c()
   
-  for (i in seq_len(ncol(model$constr))) {
-    nonZeroRows = which(model$constr[, i] != 0)
-    
-    if (length(nonZeroRows) == 1) {
-      # varaible used only one time
-      nonZeroColumns <- which(model$constr[nonZeroRows[1], -i] != 0)
+  for (i in seq_len(nrow(model$constr))) {
+    if (model$dir[i] == "=" && length(which(model$constr[i, ] != 0)) == 1) {
+      var <- which(model$constr[i, ] != 0)
+      val <- model$rhs[i] / model$constr[i, var]
+      variables <- c(variables, var)
+      values <- c(values, val)
+      rowsToRemove <- c(rowsToRemove, i)
       
-      if (length(nonZeroColumns) == 0 && model$dir[nonZeroRows[1]] == "=") {
-        variables <- c(variables, i)
-        values <- c(values, model$rhs[nonZeroRows[1]] / model$constr[nonZeroRows[1], i])
-        rowsToRemove <- c(rowsToRemove, nonZeroRows[1])
+      for (j in seq_len(nrow(model$constr))) {
+        model$rhs[j] <- model$rhs[j] - model$constr[j, var] * val
       }
-    }
+    }          
   }
   
   if (length(variables) > 0) {
