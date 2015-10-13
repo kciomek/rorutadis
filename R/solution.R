@@ -2,18 +2,20 @@
 
 #' @import Rglpk
 extremizeVariable <- function(model, variableIndex, maximize) {
-  obj <- rep(0, ncol(model$lhs))
+  obj <- rep(0, ncol(model$constraints$lhs))
   obj[variableIndex] <- 1  
-  Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs, max = maximize,
-                 types = model$types)
+  Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs, max = maximize,
+                 types = model$constraints$types)
 }
 
-maximizeEpsilon <- function(model, epsilonIndex) {
-  return (extremizeVariable(model, epsilonIndex, TRUE))
+maximizeEpsilon <- function(model) {
+  return (extremizeVariable(model, model$epsilonIndex, TRUE))
 }
 
-isModelConsistent <- function(model, epsilonIndex) {
-  ret <- maximizeEpsilon(model, epsilonIndex)
+isModelConsistent <- function(model) {
+  stopifnot(!is.null(model$epsilonIndex))
+            
+  ret <- maximizeEpsilon(model)
   return (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS)
 }
 
@@ -22,7 +24,7 @@ isModelConsistent <- function(model, epsilonIndex) {
 
 #' Get thresholds
 #'
-#' This function extracts values of thresholds from model solution.
+#' This function extracts values of thresholds from solution.
 #' 
 #' @param problem Problem whose model was solved.
 #' @param solution Result of model solving (e.g. result of
