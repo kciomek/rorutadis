@@ -1,15 +1,15 @@
 #### SOLVING MODEL
 
 #' @import Rglpk
-extremizeVariable <- function(model, variableIndex, maximize) {
-  obj <- rep(0, ncol(model$constraints$lhs))
+extremizeVariable <- function(constraints, variableIndex, maximize) {
+  obj <- rep(0, ncol(constraints$lhs))
   obj[variableIndex] <- 1  
-  Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs, max = maximize,
-                 types = model$constraints$types)
+  Rglpk_solve_LP(obj, constraints$lhs, constraints$dir, constraints$rhs, max = maximize,
+                 types = constraints$types)
 }
 
 maximizeEpsilon <- function(model) {
-  return (extremizeVariable(model, model$epsilonIndex, TRUE))
+  return (extremizeVariable(model$constraints, model$epsilonIndex, TRUE))
 }
 
 isModelConsistent <- function(model) {

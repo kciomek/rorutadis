@@ -15,9 +15,8 @@
 #' isConsistent <- checkConsistency(problem)
 #' @export
 checkConsistency <- function(problem) {
-  model <- buildBaseModel(problem)
-  epsilonIndex <- getEpsilonIndex(problem)
-  return (isModelConsistent(model, epsilonIndex))
+  model <- buildModel(problem, TRUE)
+  return (isModelConsistent(model))
 }
 
 checkRelation <- function(alternative, class, necessary, problem, baseModel,
@@ -532,5 +531,17 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     
     return (solution)
   }
+}
+
+#' @export
+findFunction <- function(problem) {
+  model <- buildModel(problem, TRUE)
+  solution <- maximizeEpsilon(model)
+  
+  if (solution$status == 0 && solution$optimum >= RORUTADIS_MINEPS) {
+    return (solution)
+  }
+  
+  return (NULL)
 }
 
