@@ -19,89 +19,46 @@ checkConsistency <- function(problem) {
   return (isModelConsistent(model))
 }
 
-checkRelation <- function(alternative, class, necessary, problem, baseModel,
-                          altVars, firstThresholdIndex, lastThresholdIndex,
-                          epsilonIndex) {
-  for (i in 1:(ncol(baseModel$lhs) - epsilonIndex))
-    altVars <- cbind(altVars, 0)
+checkRelation <- function(model, alternative, class, necessary) {
+  stopifnot(!is.null(model$epsilonIndex))
   
-  addConst <- c()
-  allConst <- baseModel
-  
-  if (necessary == TRUE) {
+  if (necessary) {
     if (class == 1) {
-      addConst <- buildLBAssignmentsConstraint(alternative,
-                                               2,
-                                               altVars,
-                                               firstThresholdIndex,
-                                               lastThresholdIndex)
-      allConst <- combineConstraints(allConst, addConst)
-    }
-    else if (class == problem$nrClasses) {
-      addConst <- buildUBAssignmentsConstraint(alternative,
-                                               problem$nrClasses - 1,
-                                               altVars,
-                                               firstThresholdIndex,
-                                               lastThresholdIndex,
-                                               epsilonIndex)
-      allConst <- combineConstraints(allConst, addConst)
-    }
-    else if (class > 1 && class < problem$nrClasses) {
-      addConst1 <- buildLBAssignmentsConstraint(alternative,
-                                                class + 1,
-                                                altVars,
-                                                firstThresholdIndex,
-                                                lastThresholdIndex)
-      addConst2 <- buildUBAssignmentsConstraint(alternative,
-                                                class - 1,
-                                                altVars,
-                                                firstThresholdIndex,
-                                                lastThresholdIndex,
-                                                epsilonIndex)
-      addConst3 <- list(lhs = rep(0, ncol(allConst$lhs)), dir = "==", rhs = 1) # this constraint is filled ~10 loc below
-      allConst <- combineConstraints(allConst, addConst1, addConst2, addConst3)
+      additionalConstraints <- buildLBAssignmentsConstraint(alternative, 2, model)
+    } else if (class == model$nrClasses) {
+      additionalConstraints <- buildUBAssignmentsConstraint(alternative, model$nrClasses - 1, model)
+    } else if (class > 1 && class < problem$nrClasses) {
+      model$constraints <- addVarialbesToModel(model$constraints, c("B", "B"))
+      nrVariables <- ncol(model$constraints$lhs)
       
-      allConst$lhs <- cbind(allConst$lhs, 0)
-      allConst$lhs <- cbind(allConst$lhs, 0)
-      allConst$types <- c(allConst$types, "B")
-      allConst$types <- c(allConst$types, "B")
+      constrLB <- buildLBAssignmentsConstraint(alternative, class + 1, model)
+      constrUB <- buildUBAssignmentsConstraint(alternative, class - 1, model)
+      constrRel <- list(lhs = rep(0, nrVariables), dir = "==", rhs = 1)
       
-      lhsdim <- dim(allConst$lhs)
-      allConst$lhs[lhsdim[1] - 2, lhsdim[2] - 1] <- RORUTADIS_BIGM
-      allConst$lhs[lhsdim[1] - 1, lhsdim[2]] <- -RORUTADIS_BIGM
-      allConst$lhs[lhsdim[1], lhsdim[2] - 1] <- 1
-      allConst$lhs[lhsdim[1], lhsdim[2]] <- 1
+      constrLB$lhs[nrVariables - 1] <- RORUTADIS_BIGM
+      constrUB$lhs[nrVariables] <- -RORUTADIS_BIGM
+      constrRel$lhs[nrVariables - 1] <- 1
+      constrRel$lhs[nrVariables] <- 1
+      
+      additionalConstraints <- combineConstraints(constrLB, constrUB, constrRel)
     }
-  }
-  else {
-    # possible
-    
+  } else { # possible    
     if (class > 1) {
-      addConst <- buildLBAssignmentsConstraint(alternative,
-                                               class,
-                                               altVars,
-                                               firstThresholdIndex,
-                                               lastThresholdIndex)
-      allConst <- combineConstraints(allConst, addConst)
+      additionalConstraints <- buildLBAssignmentsConstraint(alternative, class, model)
     }
-    if (class < problem$nrClasses) {
-      addConst <- buildUBAssignmentsConstraint(alternative,
-                                               class,
-                                               altVars,
-                                               firstThresholdIndex,
-                                               lastThresholdIndex,
-                                               epsilonIndex)
-      allConst <- combineConstraints(allConst, addConst)
+    
+    if (class < model$nrClasses) {
+      additionalConstraints <- buildUBAssignmentsConstraint(alternative, class, model)
     }
   }
   
-  ret <- maximizeEpsilon(allConst, epsilonIndex)
+  model$constraints <- combineConstraints(model$constraints, additionalConstraints)
+  optimizedEpsilon <- maximizeEpsilon(model)
   
-  if (necessary == TRUE) {
-    return (ret$status != 0 || ret$optimum < RORUTADIS_MINEPS)
-  }
-  else {
-    return (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS)
+  if (necessary) {
+    return (optimizedEpsilon$status != 0 || optimizedEpsilon$optimum < RORUTADIS_MINEPS)
+  } else {
+    return (optimizedEpsilon$status == 0 && optimizedEpsilon$optimum >= RORUTADIS_MINEPS)
   }
 }
 
@@ -148,20 +105,15 @@ calculateAssignments <- function(problem, necessary) {
   if (!checkConsistency(problem))
     stop("Model infeasible.")
   
-  baseModel <- buildBaseModel(problem)
+  baseModel <- buildModel(problem, T)
   rel <- matrix(nrow = nrow(problem$perf), ncol = problem$nrClasses)
-  altVars <- buildAltVariableMatrix(problem$perf)
-  firstThresholdIndex <- getFirstThresholdIndex(problem)
-  lastThresholdIndex <- getLastThresholdIndex(problem)
-  epsilonIndex <- getEpsilonIndex(problem)
   
-  for (alternative in 1:nrow(rel))
-    for(class in 1:ncol(rel)) {
-      rel[alternative, class] <- checkRelation(alternative, class, necessary, problem,
-                                               baseModel, altVars, firstThresholdIndex,
-                                               lastThresholdIndex, epsilonIndex)
+  for (alternative in seq_len(nrow(problem$perf))) {
+    for(class in seq_len(ncol(problem$perf))) {
+      rel[alternative, class] <- checkRelation(model, alternative, class, necessary)
       if (RORUTADIS_VERBOSE) print (paste("relation ", alternative, class, "is", rel[alternative, class]))
     }
+  }
   
   if (!is.null(rownames(problem$perf)))
     rownames(rel) <- rownames(problem$perf)
@@ -532,6 +484,8 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     return (solution)
   }
 }
+
+# todo: documentation of findFunciton
 
 #' @export
 findFunction <- function(problem) {

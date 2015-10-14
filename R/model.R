@@ -378,30 +378,31 @@ buildMonotonousThresholdsConstraints <- function(nrVars, firstThresholdIndex,
 
 ###### ASSIGNEMNT EXAMPLES
 
-buildLBAssignmentsConstraint <- function(alternative, atLeastClass, model) {
-  if (atLeastClass <= 1 || atLeastClass > lastThresholdIndex - firstThresholdIndex + 2)
+buildLBAssignmentsConstraint <- function(alternative, atLeastToClass, model) {
+  if (atLeastToClass <= 1 || atLeastToClass > model$nrClasses)
     return (NULL)
   
-  lhs <- rep(0, ncol(model$constraints))
-  lhs[firstThresholdIndex + atLeastClass - 2] <- -1
+  lhs <- ua(alternative, ncol(model$constraints$lhs), model$perfToModelVariables)
+  lhs[model$firstThresholdIndex + atLeastToClass - 2] <- -1
   
   return (list(lhs = lhs, dir = ">=", rhs = 0))
 }
 
-buildUBAssignmentsConstraint <- function(alternative,
-                                         atMostClass,
-                                         altVars,
-                                         firstThresholdIndex,
-                                         lastThresholdIndex,
-                                         epsilonIndex) {
-  if (atMostClass < 1 || atMostClass >= lastThresholdIndex - firstThresholdIndex + 2)
+buildUBAssignmentsConstraint <- function(alternative, atMostToClass, model) {
+  if (atMostToClass < 1 || atMostToClass >= model$nrClasses)
     return (NULL)
   
-  lhs <- altVars[alternative, ]
-  lhs[epsilonIndex] <- 1
-  lhs[firstThresholdIndex + atMostClass - 1] <- -1
+  rhs <- 0
+  lhs <- ua(alternative, ncol(model$constraints$lhs), model$perfToModelVariables)
+  lhs[model$firstThresholdIndex + atMostToClass - 1] <- -1
   
-  return (list(lhs = lhs, dir = "<=", rhs = 0))
+  if (is.null(model$epsilonIndex)) {
+    rhs <- -RORUTADIS_MINEPS
+  } else {
+    lhs[model$epsilonIndex] <- 1
+  }
+  
+  return (list(lhs = lhs, dir = "<=", rhs = rhs))
 }
 
 ###### PAIRWISE COMPARISIONS
@@ -956,7 +957,7 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
       atLeastToClass <- problem$assignmentsLB[k, 2]
       # todo: check if constraint necessary
       
-      lhs <- ua(alternative, nrCriteria, numberOfVariables, perfToModelVariables)
+      lhs <- ua(alternative, numberOfVariables, perfToModelVariables)
       lhs[firstThresholdIndex + atLeastToClass - 2] <- -1
       
       constraints <- combineConstraints(constraints,
@@ -973,7 +974,7 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
       atMostToClass <- problem$assignmentsUB[k, 2]
       # todo: check if constraint necessary
       
-      lhs <- ua(alternative, nrCriteria, numberOfVariables, perfToModelVariables)
+      lhs <- ua(alternative, numberOfVariables, perfToModelVariables)
       lhs[epsilonIndex] <- 1
       lhs[firstThresholdIndex + atMostToClass - 1] <- -1
       
@@ -990,16 +991,18 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
   return (list(
     constraints = constraints,
     epsilonIndex = epsilonIndex,
+    firstThresholdIndex = firstThresholdIndex,
     chPoints = chPoints,
     perfToModelVariables = perfToModelVariables,
-    prefInfoToConstraints = prefInfoToConstraints
+    prefInfoToConstraints = prefInfoToConstraints,
+    nrClasses = problem$nrClasses
     ))
 }
 
-ua <- function(alternative, nrCriteria, nrVariables, perfToModelVariables) {
+ua <- function(alternative, nrVariables, perfToModelVariables) {
   res <- rep(0, nrVariables)
   
-  for (j in seq_len(nrCriteria)) {
+  for (j in seq_len(ncol(perfToModelVariables))) {
     for (k in seq_len(length(perfToModelVariables[[alternative, j]]))) {
       res[perfToModelVariables[[alternative, j]][[k]][1]] <- perfToModelVariables[[alternative, j]][[k]][2]
     }
