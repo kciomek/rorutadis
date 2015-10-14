@@ -699,7 +699,7 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
              ), decreasing=FALSE)]
   }
   
-  perfToModelVariables <- replicate(nrAlternatives, replicate(nrCriteria, list()))
+  perfToModelVariables <- replicate(nrCriteria, replicate(nrAlternatives, list()))
   firstChPointVariableIndex <- c(1)
   chPoints <- c()
   
@@ -720,8 +720,8 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
   numberOfVariables <- firstChPointVariableIndex[length(firstChPointVariableIndex)] + chPoints[nrCriteria] - 2
   
   for (j in seq_len(nrCriteria)) {
-    firstValue <- criterionValues[[j]][[1]]
-    lastValue <- criterionValues[[j]][[length(criterionValues[[j]])]]
+    firstValue <- criterionValues[[j]][[1]]$value
+    lastValue <- criterionValues[[j]][[length(criterionValues[[j]])]]$value
     direction <- problem$criteria[j]
     
     if (problem$characteristicPoints[j] == 0) {      
@@ -946,24 +946,31 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
   
   constraints$types <- rep("C", numberOfVariables)
   
+  # building model
+  
+  model <- list(
+    constraints = constraints,
+    epsilonIndex = epsilonIndex,
+    firstThresholdIndex = firstThresholdIndex,
+    chPoints = chPoints,
+    perfToModelVariables = perfToModelVariables,
+    prefInfoToConstraints = list(),
+    nrClasses = problem$nrClasses
+  )
+  
   # preference information
   
-  prefInfoToConstraints <- list()
   prefInfoIndex <- 1
   
   if (is.matrix(problem$assignmentsLB)) {
     for (k in seq_len(nrow(problem$assignmentsLB))) {
       alternative <- problem$assignmentsLB[k, 1]
       atLeastToClass <- problem$assignmentsLB[k, 2]
-      # todo: check if constraint necessary
+            
+      model$constraints <- combineConstraints(model$constraints,
+                                              buildLBAssignmentsConstraint(alternative, atLeastToClass, model))
       
-      lhs <- ua(alternative, numberOfVariables, perfToModelVariables)
-      lhs[firstThresholdIndex + atLeastToClass - 2] <- -1
-      
-      constraints <- combineConstraints(constraints,
-                                        list(lhs = lhs, dir = ">=", rhs = 0))
-      
-      prefInfoToConstraints[[prefInfoIndex]] <- nrow(constraints$lhs)
+      model$prefInfoToConstraints[[prefInfoIndex]] <- nrow(model$constraints$lhs)
       prefInfoIndex <- prefInfoIndex + 1
     }
   }
@@ -972,31 +979,18 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
     for (k in seq_len(nrow(problem$assignmentsUB))) {
       alternative <- problem$assignmentsUB[k, 1]
       atMostToClass <- problem$assignmentsUB[k, 2]
-      # todo: check if constraint necessary
       
-      lhs <- ua(alternative, numberOfVariables, perfToModelVariables)
-      lhs[epsilonIndex] <- 1
-      lhs[firstThresholdIndex + atMostToClass - 1] <- -1
+      model$constraints <- combineConstraints(model$constraints,
+                                              buildUBAssignmentsConstraint(alternative, atMostToClass, model))
       
-      constraints <- combineConstraints(constraints,
-                                        list(lhs = lhs, dir = "<=", rhs = 0))
-      
-      prefInfoToConstraints[[prefInfoIndex]] <- nrow(constraints$lhs)
+      model$prefInfoToConstraints[[prefInfoIndex]] <- nrow(model$constraints$lhs)
       prefInfoIndex <- prefInfoIndex + 1
     }
   }
   
   # todo: the rest of pref info to implement
 
-  return (list(
-    constraints = constraints,
-    epsilonIndex = epsilonIndex,
-    firstThresholdIndex = firstThresholdIndex,
-    chPoints = chPoints,
-    perfToModelVariables = perfToModelVariables,
-    prefInfoToConstraints = prefInfoToConstraints,
-    nrClasses = problem$nrClasses
-    ))
+  return (model)
 }
 
 ua <- function(alternative, nrVariables, perfToModelVariables) {
