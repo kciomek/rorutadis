@@ -9,13 +9,14 @@ extremizeVariable <- function(constraints, variableIndex, maximize) {
 }
 
 maximizeEpsilon <- function(model) {
+  stopifnot(!is.null(model$epsilonIndex))
+  
   return (extremizeVariable(model$constraints, model$epsilonIndex, TRUE))
 }
 
-isModelConsistent <- function(model) {
-  stopifnot(!is.null(model$epsilonIndex))
-            
+isModelConsistent <- function(model) {            
   ret <- maximizeEpsilon(model)
+  
   return (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS)
 }
 
@@ -47,9 +48,8 @@ isModelConsistent <- function(model) {
 #' thresholds <- getThresholds(problem, representativeFunction)
 #' @export
 getThresholds <- function(problem, solution) {
-  firstThresholdIndex <- getFirstThresholdIndex(problem)
-  lastThresholdIndex <- getLastThresholdIndex(problem)
-  return (solution$solution[firstThresholdIndex:lastThresholdIndex])
+  model <- buildModel(problem, T)
+  return (solution$solution[model$firstThresholdIndex:(model$firstThresholdIndex + problem$nrClasses - 2)])
 }
 
 #' Get marginal utilities

@@ -76,6 +76,30 @@ checkClassCardinality <- function(class, maximum, nrAlternatives, nrClasses,
   return (ret$optimum)
 }
 
+# TRUE if alternative is always assigned to class at least as good as class of referenceAlternative
+compareAssignment <- function(model, alternative, referenceAlternative) {
+  stopifnot(!is.null(model$epsilonIndex))
+  
+  if (alternative == referenceAlternative) {
+    return (TRUE)
+  }
+  
+  for (class in seq_len(model$nrClasses - 1)) {
+    constraintForI <- buildUBAssignmentsConstraint(alternative, class, model)
+    constraintForJ <- buildLBAssignmentsConstraint(referenceAlternative, class + 1, model)
+    
+    model$constraints <- combineConstraints(model$constraints, constraintForI, constraintForJ)
+    
+    ret <- maximizeEpsilon(model)
+    
+    if (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS) {
+      return (FALSE)
+    }
+  }
+  
+  return (TRUE)
+}
+
 #### MAIN PUBLIC FUNCTIONS
 
 #' Calculate assignments
@@ -123,16 +147,13 @@ calculateAssignments <- function(problem, necessary) {
 
 #' Compare assignments
 #'
-#' This function compares assignments. In this version of the package only necessary
-#' assignments are supported.
+#' This function compares assignments.
 #'
 #' @param problem Problem for which assignments will be compared.
-#' @param necessary Whether necessary or possible assignments. 
 #' @return \emph{n} x \emph{n} logical matrix, where \code{n} is a number of
 #' alternatives. Cell \code{[i, j]} is \code{TRUE} if \emph{a_i} is assigned to
 #' class at least as good as class of \emph{a_j} for all compatible value
-#' functions for necessary assignments or for at least one compatible value function
-#' for possible assignments.
+#' functions.
 #' @examples
 #' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
 #' problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
@@ -140,43 +161,16 @@ calculateAssignments <- function(problem, necessary) {
 #' 
 #' resultOfComparison <- compareAssignments(problem)
 #' @export
-compareAssignments <- function(problem, necessary = TRUE) {
-  if (necessary == FALSE) {
-    stop("Comparing possible assignments not supported.")
-  }
-  
+compareAssignments <- function(problem) {
   nrAlternatives <- nrow(problem$perf)
-  altVars <- buildAltVariableMatrix(problem$perf)
-  baseModel <- buildBaseModel(problem)
-  epsilonIndex <- ncol(altVars)
-  firstThresholdIndex <- ncol(altVars) + sum(getNrLinearSegments(problem$characteristicPoints)) + 1
-  lastThresholdIndex <- firstThresholdIndex + problem$nrClasses - 2
-  
-  for (i in 1:(ncol(baseModel$lhs) - epsilonIndex))
-    altVars <- cbind(altVars, 0)
+  model <- buildModel(problem, T)
   
   result <- matrix(nrow = nrAlternatives, ncol = nrAlternatives)
   
-  for (i in 1:nrAlternatives) {
-    for (j in 1:nrAlternatives) {
-      result[i, j] <- TRUE
-      
-      for (class in 1:(problem$nrClasses - 1)) {
-        constraintForI <- buildUBAssignmentsConstraint(i, class, altVars, firstThresholdIndex,
-                                                       lastThresholdIndex, epsilonIndex)
-        constraintForJ <- buildLBAssignmentsConstraint(j, class + 1, altVars, firstThresholdIndex,
-                                                       lastThresholdIndex)
-        
-        newModel <- combineConstraints(baseModel, constraintForI, constraintForJ)
-        
-        ret <- maximizeEpsilon(newModel, epsilonIndex)
-        
-        if (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS) {
-          result[i, j] <- FALSE
-          break
-        }
-      }
-      
+  for (i in seq_len(nrAlternatives)) {
+    for (j in seq_len(nrAlternatives)) {
+      result[i, j] <- compareAssignment(model, i, j)
+            
       if (RORUTADIS_VERBOSE) print (paste("It is ", result[i, j], " that alternative ",
                                           i, " is always in at least as good class as class of alternative ",
                                           j, ".", sep = ""))
