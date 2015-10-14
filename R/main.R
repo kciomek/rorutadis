@@ -105,11 +105,11 @@ calculateAssignments <- function(problem, necessary) {
   if (!checkConsistency(problem))
     stop("Model infeasible.")
   
-  baseModel <- buildModel(problem, T)
+  model <- buildModel(problem, T)
   rel <- matrix(nrow = nrow(problem$perf), ncol = problem$nrClasses)
   
   for (alternative in seq_len(nrow(problem$perf))) {
-    for(class in seq_len(ncol(problem$perf))) {
+    for(class in seq_len(problem$nrClasses)) {
       rel[alternative, class] <- checkRelation(model, alternative, class, necessary)
       if (RORUTADIS_VERBOSE) print (paste("relation ", alternative, class, "is", rel[alternative, class]))
     }
