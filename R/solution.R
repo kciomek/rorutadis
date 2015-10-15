@@ -20,6 +20,96 @@ isModelConsistent <- function(model) {
   return (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS)
 }
 
+toSolution <- function(model, values) {
+  nrVariables <- ncol(model$constraints$lhs)
+  nrAlternatives <- nrow(model$perfToModelVariables)
+  nrCriteria <- ncol(model$perfToModelVariables)
+    
+  stopifnot(length(values) == nrVariables)
+  
+  # thresolds
+  
+  thresholds = values[model$firstThresholdIndex:(model$firstThresholdIndex + problem$nrClasses - 2)]
+  
+  # assignments
+  
+  assignments <- c()  
+  for (i in seq_len(nrAlternatives)) {
+    assignments[i] <- 1
+    
+    for (h in seq_len(model$nrClasses - 1)) {
+      if (sum(ua(i, nrVariables, model$perfToModelVariables) * values) < thresholds[h]) { #todo: consider epsilon
+        break
+      }
+      
+      assignements[i] <- assignements[i] + 1
+    }
+  }
+  
+  # epsilon
+  
+  epsilon <- NULL
+  
+  if (!is.null(model$epsilonIndex)) {
+    epsilon <- values[model$epsilonIndex]
+  } else {
+    epsilon <- RORUTADIS_MINEPS
+  }
+  
+  # vf
+  
+  vf <- list()
+  
+  for (j in seq_len(nrCriteria)) {
+    nrValues <- length(model$criterionValues[[j]])
+    
+    if (model$generalVF[j]) {
+      x <- sapply(model$criterionValues[[j]], function(w) { w$value })
+    } else {
+      firstValue <- model$criterionValues[[j]][[1]]$value
+      lastValue <- model$criterionValues[[j]][[length(model$criterionValues[[j]])]]$value
+      intervalLength <- lastValue - firstValue
+      
+      x <- c(firstValue,
+             sapply(seq_len(model$chPoints[j] - 2), function(w) { firstValue + intervalLength * w }),
+             lastValue)
+    }
+    
+    y <- values[model$firstChPointVariableIndex[j] : model$firstChPointVariableIndex[j] + model$chPoints[j] - 2]
+    
+    if (model$criterionPreferenceDirection[j] == "g") {
+      y <- c(0, y)
+    } else {
+      y <- c(y, 0)
+    }
+    
+    vf[[j]] <- cbind(x, y)
+  }
+  
+  # alternative values
+  
+  alternativeValues <- matrix(nrow=nrAlternatives, ncol=nrCriteria)
+  
+  for (i in seq_len(nrAlternatives)) {
+    for (j in seq_len(nrCriteria)) {
+      alternativeValues[i, j] <- 0
+      
+      for (k in seq_len(length(model$perfToModelVariables[[i, j]]))) {
+        alternativeValues[i, j] <- alternativeValues[i, j] + values[model$perfToModelVariables[[i, j]][[k]][1]] * model$perfToModelVariables[[i, j]][[k]][2]
+      }
+    }
+  }
+  
+  return (list(
+    vf = vf,
+    thresholds = thresholds,
+    assignments = assignments,
+    alternativeValues = alternativeValues,
+    solution = values,
+    epsilon = epsilon,
+    generalVF = model$generalVF
+    ))
+}
 
 #### SOLUTION
 
@@ -48,8 +138,8 @@ isModelConsistent <- function(model) {
 #' thresholds <- getThresholds(problem, representativeFunction)
 #' @export
 getThresholds <- function(problem, solution) {
-  model <- buildModel(problem, T)
-  return (solution$solution[model$firstThresholdIndex:(model$firstThresholdIndex + problem$nrClasses - 2)])
+  .Deprecated()
+  return (solution$thresholds)
 }
 
 #' Get marginal utilities
@@ -76,25 +166,8 @@ getThresholds <- function(problem, solution) {
 #' marginalUtilities <- getMarginalUtilities(problem, representativeFunction)
 #' @export
 getMarginalUtilities <- function(problem, solution) {
-  levels <- getLevels(problem$perf)
-  offsets <- getOffsets(levels)
-  epsilonIndex <- getNrVars(levels)
-  altVars <- buildAltVariableMatrix(problem$perf)
-  
-  utility <- matrix(ncol = ncol(problem$perf), nrow = nrow(problem$perf))
-  
-  for (i in seq_len(length(levels))) {    
-    for (j in seq_len(length(levels[[i]]))) {
-      index <- offsets[i] + j - 1
-      for (k in seq_len(nrow(altVars))) {
-        if (altVars[k, index] == 1) {
-          utility[k, i] <- solution$solution[index]
-        }
-      }
-    }
-  }
-  
-  return (utility)
+  .Deprecated()
+  return (solution$alternativeValues)
 }
 
 #' Get characteristic points
@@ -123,63 +196,8 @@ getMarginalUtilities <- function(problem, solution) {
 #' characteristicPoints <- getCharacteristicPoints(problem, representativeFunction)
 #' @export
 getCharacteristicPoints <- function(problem, solution) {
-  levels <- getLevels(problem$perf)
-  offsets <- getOffsets(levels)
-  epsilonIndex <- getNrVars(levels)
-  altVars <- buildAltVariableMatrix(problem$perf)
-  firstCharacteristicPointIndex <- NULL
-  linearSegments <- getNrLinearSegments(problem$characteristicPoints)
-  if (sum(linearSegments) > 0) {
-    firstCharacteristicPointIndex <- getFirstCharacteristicPointIndex(problem)
-  }
-  
-  characteristicPoints <- list()
-  
-  for (i in seq_len(length(levels))) {
-    maximum <- max(problem$perf[, i])
-    minimum <- min(problem$perf[, i])
-    
-    chPoint_x <- c()
-    chPoint_y <- c()
-    
-    if (problem$characteristicPoints[i] != 0) {
-      if (problem$criteria[i] == 'g') {
-        chPoint_x <- c(minimum)
-        chPoint_y <- c(0)
-        
-        for (j in seq_len(linearSegments[i])) {
-          index <- firstCharacteristicPointIndex + j - 1
-          
-          chPoint_x <- c(chPoint_x, minimum + ((maximum - minimum) * j) / linearSegments[i])
-          chPoint_y <- c(chPoint_y, solution$solution[index])
-        }
-      }
-      else {
-        for (j in seq_len(linearSegments[i])) {
-          index <- firstCharacteristicPointIndex + j - 1
-          
-          chPoint_x <- c(chPoint_x, minimum + ((maximum - minimum) * (j - 1)) / linearSegments[i])
-          chPoint_y <- c(chPoint_y, solution$solution[index])
-        }
-        
-        chPoint_x <- c(chPoint_x, maximum)
-        chPoint_y <- c(chPoint_y, 0)
-      }
-      
-      firstCharacteristicPointIndex <- firstCharacteristicPointIndex + linearSegments[i]
-    }
-    else {
-      for (j in seq_len(length(levels[[i]]))) {
-        chPoint_x <- c(chPoint_x, levels[[i]][j])
-        chPoint_y <- c(chPoint_y, solution$solution[offsets[i] + j - 1])
-      }
-    }
-    
-    characteristicPoints[[length(characteristicPoints) + 1]] <- matrix(data = c(chPoint_x, chPoint_y),
-                                                                       ncol = 2, byrow = FALSE)
-  }
-  
-  return (characteristicPoints)
+  .Deprecated()
+  return (solution$vf)
 }
 
 
@@ -207,19 +225,7 @@ getCharacteristicPoints <- function(problem, solution) {
 #' assignments <- getAssignments(problem, representativeFunction)
 #' @export
 getAssignments <- function(problem, solution) {
-  nrAlternatives  = nrow(problem$perf)
-  assignments <- array(dim = nrAlternatives)
-  firstClAssgnBinVarIndex <- getFirstClAsgnBinVarIndex(problem)
-  
-  for (i in seq_len(nrAlternatives)) {
-    for (j in seq_len(problem$nrClasses)) {
-      if (solution$solution[firstClAssgnBinVarIndex + (i - 1) * problem$nrClasses + j - 1] > 0.5) {
-        assignments[i] = j
-        break
-      }
-    }
-  }
-  
-  return (assignments)
+  .Deprecated()
+  return (solution$assignments)
 }
 

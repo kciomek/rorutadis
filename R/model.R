@@ -579,12 +579,16 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
   
   model <- list(
     constraints = constraints,
+    firstChPointVariableIndex = firstChPointVariableIndex,
     epsilonIndex = epsilonIndex,
     firstThresholdIndex = firstThresholdIndex,
     chPoints = chPoints,
     perfToModelVariables = perfToModelVariables,
+    criterionValues = criterionValues,
+    criterionPreferenceDirection = problem$criteria,
     prefInfoToConstraints = list(),
-    nrClasses = problem$nrClasses
+    nrClasses = problem$nrClasses,
+    generalVF = problem$characteristicPoints == 0
   )
   
   # preference information

@@ -42,13 +42,17 @@ checkRelation <- function(model, alternative, class, necessary) {
       
       additionalConstraints <- combineConstraints(constrLB, constrUB, constrRel)
     }
-  } else { # possible    
+  } else { # possible
+    additionalConstraints <- NULL
+    
     if (class > 1) {
-      additionalConstraints <- buildLBAssignmentsConstraint(alternative, class, model)
+      additionalConstraints <- combineConstraints(additionalConstraints,
+                                                  buildLBAssignmentsConstraint(alternative, class, model))
     }
     
     if (class < model$nrClasses) {
-      additionalConstraints <- buildUBAssignmentsConstraint(alternative, class, model)
+      additionalConstraints <- combineConstraints(additionalConstraints,
+                                                  buildUBAssignmentsConstraint(alternative, class, model))
     }
   }
   
@@ -479,15 +483,15 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
   }
 }
 
-# todo: documentation of findFunciton
+# todo: documentation of findSimpleFunction
 
 #' @export
-findFunction <- function(problem) {
+findSimpleFunction <- function(problem) {
   model <- buildModel(problem, TRUE)
   solution <- maximizeEpsilon(model)
   
   if (solution$status == 0 && solution$optimum >= RORUTADIS_MINEPS) {
-    return (solution)
+    return (toSolution(model, solution$solution))
   }
   
   return (NULL)
