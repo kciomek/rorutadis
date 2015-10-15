@@ -335,45 +335,48 @@ mergeAssignments <- function(assignmentList, necessary) {
 findRepresentativeFunction <- function(problem, mode, relation = NULL) {
   stopifnot(mode == 0 || mode == 1)
   
+  solution <- NULL
+  
   if (is.null(relation)) {
     relation <- compareAssignments(problem)
   }
   
-  model <- buildBaseModel(problem, TRUE)
+  model <- buildModel(problem, F)
   nrAlternatives <- nrow(problem$perf)
-  altVars <- buildAltVariableMatrix(problem$perf)
   
-  if (mode == 0) {
-    # iterative mode
-    
-    deltaIndex <- ncol(model$lhs) + 1
-    gammaIndex <- ncol(model$lhs) + 3
-    model <- addVarialbesToModel(model, c("C", "C", "C", "C"))
+  if (mode == 0) { # iterative mode    
+    deltaIndex <- ncol(model$constraints$lhs) + 1
+    gammaIndex <- ncol(model$constraints$lhs) + 3
+    model$constraints <- addVarialbesToModel(model$constraints, c("C", "C", "C", "C"))
+    nrVariables <- ncol(model$constraints$lhs)
     
     for (i in 1:(nrAlternatives - 1)) {
       for (j in (i + 1):nrAlternatives) {
         if (relation[i, j] && !relation[j, i]) {
           #U(a_i) - U(a_j) >= delta
-          newConstraint <- buildUtilityDifferenceConstraint(i, j, altVars, ncol(model$lhs))
-          newConstraint[deltaIndex] <- -1
-          newConstraint[deltaIndex + 1] <- 1
-          model <- combineConstraints(model, list(lhs = newConstraint, dir = ">=", rhs = 0))
-        }
-        else if (!relation[i, j] && relation[j, i]) {
+          valueDifferenceLhs <- ua(i, nrVariables, model$perfToModelVariables) -
+            ua(j, nrVariables, model$perfToModelVariables)
+          valueDifferenceLhs[deltaIndex] <- -1
+          valueDifferenceLhs[deltaIndex + 1] <- 1
+          model$constraints <- combineConstraints(model$constraints,
+                                                  list(lhs = valueDifferenceLhs, dir = ">=", rhs = 0))
+        } else if (!relation[i, j] && relation[j, i]) {
           #U(a_j) - U(a_i) >= delta
-          newConstraint <- buildUtilityDifferenceConstraint(j, i, altVars, ncol(model$lhs))
-          newConstraint[deltaIndex] <- -1
-          newConstraint[deltaIndex + 1] <- 1
-          model <- combineConstraints(model, list(lhs = newConstraint, dir = ">=", rhs = 0))
+          valueDifferenceLhs <- ua(j, nrVariables, model$perfToModelVariables) -
+            ua(i, nrVariables, model$perfToModelVariables)
+          valueDifferenceLhs[deltaIndex] <- -1
+          valueDifferenceLhs[deltaIndex + 1] <- 1
+          model$constraints <- combineConstraints(model$constraints,
+                                                  list(lhs = valueDifferenceLhs, dir = ">=", rhs = 0))
         }
       }
     }
     
-    obj <- rep(0, ncol(model$lhs))
+    obj <- rep(0, nrVariables)
     obj[deltaIndex] <- 1  
     obj[deltaIndex + 1] <- -1 
-    solution <-  Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs,
-                                max = TRUE, types = model$types)
+    solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
+                               max = TRUE, types = model$types)
     
     if (solution$status != 0) {
       return (NULL)
@@ -383,36 +386,44 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
       warning(paste("Solution was found, but the optimization target is negative (", solution$optimum, ").", sep = ""))
     }
     
-    newConstraint <- rep(0, ncol(model$lhs))
-    newConstraint[deltaIndex] <- 1
-    newConstraint[deltaIndex + 1] <- -1
-    model <- combineConstraints(model, list(lhs = newConstraint,
-                                            dir = "==",
-                                            rhs = solution$optimum))
-    # print (solution$optimum)
+    fixedDeltaConstr <- rep(0, nrVariables)
+    fixedDeltaConstr[deltaIndex] <- 1
+    fixedDeltaConstr[deltaIndex + 1] <- -1
+    model$constraints <- combineConstraints(model$constraints, list(lhs = fixedDeltaConstr,
+                                                                    dir = "==",
+                                                                    rhs = solution$optimum))
     
     for (i in 1:(nrAlternatives - 1)) {
       for (j in (i + 1):nrAlternatives) {
         if (relation[i, j] == relation[j, i]) {
           #U(a_i) - U(a_j) <= gamma
           #U(a_j) - U(a_i) <= gamma
-          newConstraint <- buildUtilityDifferenceConstraint(i, j, altVars, ncol(model$lhs))
-          newConstraint[gammaIndex] <- -1
-          newConstraint[gammaIndex + 1] <- 1
-          model <- combineConstraints(model, list(lhs = newConstraint, dir = "<=", rhs = 0))
-          newConstraint <- buildUtilityDifferenceConstraint(j, i, altVars, ncol(model$lhs))
-          newConstraint[gammaIndex] <- -1
-          newConstraint[gammaIndex + 1] <- 1
-          model <- combineConstraints(model, list(lhs = newConstraint, dir = "<=", rhs = 0))
+          ijValueDifferenceLhs <- ua(i, nrVariables, model$perfToModelVariables) -
+            ua(j, nrVariables, model$perfToModelVariables)
+          ijValueDifferenceLhs[gammaIndex] <- -1
+          ijValueDifferenceLhs[gammaIndex + 1] <- 1
+          
+          jiValueDifferenceLhs <- ua(j, nrVariables, model$perfToModelVariables) -
+            ua(i, nrVariables, model$perfToModelVariables)
+          jiValueDifferenceLhs[gammaIndex] <- -1
+          jiValueDifferenceLhs[gammaIndex + 1] <- 1
+          
+          model$constraints <- combineConstraints(model$constraints,
+                                                  list(lhs = ijValueDifferenceLhs,
+                                                       dir = "<=",
+                                                       rhs = 0),
+                                                  list(lhs = jiValueDifferenceLhs,
+                                                       dir = "<=",
+                                                       rhs = 0))
         }
       }
     }
     
-    obj <- rep(0, ncol(model$lhs))
+    obj <- rep(0, nrVariables)
     obj[gammaIndex] <- 1  
     obj[gammaIndex + 1] <- -1 
-    solution <- Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs,
-                              max = FALSE, types = model$types)
+    solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
+                               max = FALSE, types = model$types)
     
     if (solution$status != 0) {
       return (NULL)
@@ -421,15 +432,10 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     if (solution$optimum < 0) {
       warning(paste("Solution was found, but the optimization target is negative (", solution$optimum, ").", sep = ""))
     }
-    
-    return (solution)
-  }
-  else if (mode == 1) {
-    # compromise mode
-    
-    deltaIndex <- ncol(model$lhs) + 1
-    model <- addVarialbesToModel(model, c("C", "C"))
-    altVars <- buildAltVariableMatrix(problem$perf)
+  } else if (mode == 1) { # compromise mode    
+    deltaIndex <- ncol(model$constraints$lhs) + 1
+    model$constraints <- addVarialbesToModel(model$constraints, c("C", "C"))
+    nrVariables <- ncol(model$constraints$lhs)
     different <- c()
     similar <- c()
     
@@ -437,11 +443,9 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
       for (j in (i + 1):nrAlternatives) {
         if (relation[i, j] && !relation[j, i]) {
           different <- c(different, i, j)
-        }
-        else if (!relation[i, j] && relation[j, i]) {
+        } else if (!relation[i, j] && relation[j, i]) {
           different <- c(different, j, i)
-        }
-        else {
+        } else {
           similar <- c(similar, i, j)
         }
       }
@@ -453,22 +457,21 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     
     for (i in seq(1, length(different), by = 2)) {
       for (j in seq(1, length(similar), by = 2)) {
-        newConstraint <- buildUtilityMultipleDifferenceConstraint(different[i],
-                                                                  different[i + 1],
-                                                                  similar[j],
-                                                                  similar[j + 1], 
-                                                                  altVars,
-                                                                  ncol(model$lhs))
-        newConstraint[deltaIndex] <- -1
-        newConstraint[deltaIndex + 1] <- 1
-        model <- combineConstraints(model, list(lhs = newConstraint, dir = ">=", rhs = 0))
+        valueDifferenceLhs <- ua(different[i], nrVariables, model$perfToModelVariables) -
+          ua(different[i + 1], nrVariables, model$perfToModelVariables) +
+          ua(similar[j], nrVariables, model$perfToModelVariables) -
+          ua(similar[j + 1], nrVariables, model$perfToModelVariables)
+        valueDifferenceLhs[deltaIndex] <- -1
+        valueDifferenceLhs[deltaIndex + 1] <- 1
+        model$constraints <- combineConstraints(model$constraints,
+                                                list(lhs = valueDifferenceLhs, dir = ">=", rhs = 0))
       }
     }
     
-    obj <- rep(0, ncol(model$lhs))
+    obj <- rep(0, nrVariables)
     obj[deltaIndex] <- 1  
     obj[deltaIndex + 1] <- -1 
-    solution <- Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs,
+    solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
                                max = TRUE, types = model$types)
     
     if (solution$status != 0) {
@@ -478,9 +481,9 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     if (solution$optimum < 0) {
       warning(paste("Solution was found, but the optimization target is negative (", solution$optimum, ").", sep = ""))
     }
-    
-    return (solution)
   }
+  
+  return (toSolution(model, solution$solution))
 }
 
 # todo: documentation of findSimpleFunction

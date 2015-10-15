@@ -225,31 +225,6 @@ addAlternativeThresholdComparisionConstraint <- function(alternative,
   return (combineConstraints(model, list(lhs = lhs, dir = dir, rhs = 0)))
 }
 
-###### REPRESENTATIVE FUNCTION - CONSTRAINTS
-
-buildUtilityDifferenceConstraint <- function(alternativeA, alternativeB,
-                                             altVars, nrVariables) {
-  result <- altVars[alternativeA, ]
-  
-  for (k in 1:length(altVars[alternativeB, ]))
-    result[k] <- result[k] - altVars[alternativeB, k]
-  
-  return (c(result, rep(0, nrVariables - ncol(altVars))))
-}
-
-buildUtilityMultipleDifferenceConstraint <- function(alternativeA, alternativeB,
-                                                     alternativeC, alternativeD,
-                                                     altVars, nrVariables) {
-  result <- altVars[alternativeA, ]
-  
-  for (k in 1:length(altVars[alternativeB, ])) {
-    result[k] <- result[k] - altVars[alternativeB, k] +
-      altVars[alternativeC, k] - altVars[alternativeD, k]
-  }
-  
-  return (c(result, rep(0, nrVariables - ncol(altVars))))
-}
-
 #### HELPERS
 
 addVarialbesToModel <- function(model, variables) {

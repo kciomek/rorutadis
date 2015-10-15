@@ -29,7 +29,7 @@ toSolution <- function(model, values) {
   
   # thresolds
   
-  thresholds = values[model$firstThresholdIndex:(model$firstThresholdIndex + problem$nrClasses - 2)]
+  thresholds <- values[model$firstThresholdIndex:(model$firstThresholdIndex + model$nrClasses - 2)]
   
   # assignments
   
@@ -42,7 +42,7 @@ toSolution <- function(model, values) {
         break
       }
       
-      assignements[i] <- assignements[i] + 1
+      assignments[i] <- assignments[i] + 1
     }
   }
   
@@ -68,15 +68,15 @@ toSolution <- function(model, values) {
     } else {
       firstValue <- model$criterionValues[[j]][[1]]$value
       lastValue <- model$criterionValues[[j]][[length(model$criterionValues[[j]])]]$value
-      intervalLength <- lastValue - firstValue
+      intervalLength <- (lastValue - firstValue) / (model$chPoints[j] - 1)
       
       x <- c(firstValue,
-             sapply(seq_len(model$chPoints[j] - 2), function(w) { firstValue + intervalLength * w }),
+             unlist(sapply(seq_len(model$chPoints[j] - 2), function(w) { firstValue + intervalLength * w })),
              lastValue)
     }
     
-    y <- values[model$firstChPointVariableIndex[j] : model$firstChPointVariableIndex[j] + model$chPoints[j] - 2]
-    
+    y <- values[model$firstChPointVariableIndex[j] : (model$firstChPointVariableIndex[j] + model$chPoints[j] - 2)]
+        
     if (model$criterionPreferenceDirection[j] == "g") {
       y <- c(0, y)
     } else {
