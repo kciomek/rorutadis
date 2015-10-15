@@ -39,111 +39,105 @@
 drawUtilityPlots <- function(problem, solution, printLabels = TRUE,
                              criteria = NULL, plotsPerRow = 2,
                              descending = NULL) {
-  stopifnot(is.logical(printLabels))
-  stopifnot(plotsPerRow > 0)
-  stopifnot(length(which(criteria < 0)) == 0)
-  a <- NULL
-  U <- NULL
+  .Deprecated("plotVF or plotComprehensiveValue")
   
   if (is.null(criteria)) {
-    criteria <- c(1:ncol(problem$perf), 0)
+    criteria <- c(seq_len(ncol(problem$perf)), 0)
   }
   
-  graphs <- vector("list", length(criteria))
+  graphs <- list()
   
-  altVars <- buildAltVariableMatrix(problem$perf)
-  marginalUtilities <- getMarginalUtilities(problem, solution)
-  characteristicPoints <- getCharacteristicPoints(problem, solution)
-  labels <- rownames(problem$perf)
-  
-  if (is.null(labels)) {
-    labels <- paste("a", 1:nrow(problem$perf), sep = "")
-  }
-
-  for (index in seq_len(length(criteria))) {
-    if (criteria[index] == 0) {
-      df <- data.frame(a = labels,
-                       U = sapply(1:nrow(problem$perf),
-                                  function(x) { sum(marginalUtilities[x, ]) } ))
-               
-      graphs[[index]] <- ggplot(data = df, aes(x = a, y = U)) +
-        geom_bar(stat = "identity") +
-        xlab("alternative") +
-        ylab("U") +
-        theme_bw(base_size = 20) +
-        expand_limits(y = 1.05) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
-      
-      if (is.null(descending) == FALSE) {
-        if (descending) {
-          graphs[[index]] <- graphs[[index]] +
-            scale_x_discrete(limits = df[with(df, order(-U)), ]$a)
-        }
-        else {
-          graphs[[index]] <- graphs[[index]] +
-            scale_x_discrete(limits = df[with(df, order(U)), ]$a)
-        }
-      }
-      
-      if (printLabels) {
-        graphs[[index]] <- graphs[[index]] + geom_text(aes(a, U, label = round(U, 2)),
-                                                       size = 5,
-                                                       hjust = 0.5,
-                                                       vjust = -0.1,
-                                                       angle = 0)
-      }
-    }
-    else {
-      i = criteria[index]
-      
-      
-      g = u = l = c()
-      
-      for (j in seq_len(nrow(problem$perf))) {
-        rowFound <- FALSE
-        
-        for (k in seq_len(length(g))) {
-          if (g[k] == problem$perf[j, i] && u[k] == marginalUtilities[j, i]) {
-            l[k] <- paste(l[k], labels[j], sep=", ")
-            rowFound <- TRUE
-            break
-          }
-        }
-        
-        if (rowFound == FALSE) {
-          g = c(g, problem$perf[j, i])
-          u = c(u, marginalUtilities[j, i])
-          l = c(l, labels[j])
-        }
-      }
-      
-      df <- data.frame(g = g, u = u, l = l)
-      
-      graphs[[index]] <- ggplot(df, aes(x = g, y = u)) + 
-        geom_point(size = 3) +
-        xlab(paste("g", i, sep = "")) +
-        ylab(paste("u", i, sep = "")) +
-        theme_bw(base_size = 20)
-      
-      if (printLabels) {
-        graphs[[index]] <- graphs[[index]] + geom_text(aes(g, u, label = l),
-                                               size = 5,
-                                               hjust = sapply(unlist(df['u']),
-                                                              function(x) {if(x < max(df['u'])/2.0) return (-0.1) else return (1.1)}),
-                                               vjust = 0.25,
-                                               angle = 90)
-      }
-      
-      if (problem$characteristicPoints[i] > 0) {
-        pointsDf = data.frame(g = unlist(characteristicPoints[[i]][, 1]),
-                        u = unlist(characteristicPoints[[i]][, 2]))
-        graphs[[index]] <- graphs[[index]] + 
-          geom_line(data = pointsDf, aes(x = g, y = u), colour = "grey20")
-      }
+  for (j in criteria) {
+    if (j == 0) {
+      graphs[[length(graphs) + 1]] <- plotComprehensiveValue(solution)
+    } else {
+      graphs[[length(graphs) + 1]] <- plotVF(solution, j)
     }
   }
   
   nCol <- max(floor(sqrt(length(graphs))), plotsPerRow)
   
   grid.arrange(do.call(arrangeGrob, c(graphs, list(ncol = nCol))))
+}
+
+# todo: documentation of plotVF
+#' @export
+plotVF <- function(solution, criterion, yAxis = "max", showAlternatives = FALSE, title = TRUE) {
+  stopifnot(yAxis %in% c("adjusted", "max", "unit"))
+  
+  df <- as.data.frame(solution$vf[[criterion]])
+  
+  p <- ggplot(df, aes(x, y)) + 
+    geom_point(size = 4) +
+    xlab("performance") +
+    ylab("value") +
+    theme_bw(base_size = 20)
+  
+  if (!solution$generalVF[criterion]) {
+    p <- p + geom_line(data = df, aes(x, y))
+  }
+  
+  if (yAxis == "unit") {
+    p <- p + ylim(0, 1)
+  } else if (yAxis == "max") {
+    p <- p + ylim(0, max(sapply(solution$vf, function(w) { max(w[, 2]) })))
+  }
+  
+  if (is.logical(title)) {
+    if (title) {
+      p <- p + ggtitle(paste("Value function of criterion", criterion))
+    }
+  } else {
+    p <- p + ggtitle(title)
+  }
+  
+  if (showAlternatives) {
+    # todo
+    warning ("showAlternatives is not supported yet")
+  }
+  
+  return (p)
+}
+
+# todo: documentation of plotComprehensiveValue
+#' @export
+plotComprehensiveValue <- function(solution, order = "alternatives", showThresholds = FALSE, title = FALSE) {
+  stopifnot(order %in% c("alternatives", "asc", "desc"))
+  
+  if (order %in% c("asc", "desc")) {
+    stop ("selected order is not supported yet")
+  }
+  
+  nrAlternatives <- nrow(solution$alternativeValues)
+  alternativeNames <- names(solution$alternativeValues)
+  
+  if (is.null(alternativeNames)) {
+    alternativeNames <- paste("a", seq_len(nrAlternatives), sep="")
+  }
+  
+  df <- data.frame(alternative = alternativeNames,
+                   value = sapply(seq_len(nrAlternatives), function(w) { sum(solution$alternativeValues[w, ]) } ),
+                   class = paste("C", solution$assignments, sep=""))
+  
+  p <- ggplot(data = df, aes(x = alternative, y = value, fill = class)) +
+    geom_bar(stat = "identity") +
+    xlab("alternative") +
+    ylab("comprehensive value") +
+    theme_bw(base_size = 20) +
+    expand_limits(y = 1.00) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  if (is.logical(title)) {
+    if (title) {
+      p <- p + ggtitle("Comprehensive value of alternatives")
+    }
+  } else {
+    p <- p + ggtitle(title)
+  }
+  
+  if (showThresholds) {
+    p <- p + geom_hline(yintercept=solution$thresholds, linetype="dashed")
+  }
+  
+  return (p)
 }
