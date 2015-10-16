@@ -29,14 +29,10 @@ buildUBAssignmentsConstraint <- function(alternative, atMostToClass, model) {
 
 ###### PAIRWISE COMPARISIONS
 
-buildassignmentPairwiseAtLeastComparisonsConstraints <- function(alternativeA,
+buildAssignmentPairwiseAtLeastComparisonsConstraints <- function(alternativeA,
                                                                  alternativeB,
                                                                  k,
-                                                                 altVars,
-                                                                 firstThresholdIndex,
-                                                                 lastThresholdIndex,
-                                                                 firstBinaryVarIndex,
-                                                                 epsilonIndex) {
+                                                                 model) {
   lhsData <- c()
   dirData <- c()
   rhsData <- c()
@@ -123,51 +119,6 @@ buildassignmentPairwiseAtMostComparisonsConstraints <- function(alternativeA,
 
 ###### DESIRED CLASS CARDINALITIES
 
-buildClassCardinalitiesHelperConstraints <- function(alternative,
-                                                     altVars,
-                                                     firstThresholdIndex,
-                                                     lastThresholdIndex,
-                                                     firstBinaryVarForThisAlternativeIndex,
-                                                     epsilonIndex) {  
-  lhsData <- c()
-  dirData <- c()
-  rhsData <- c()
-  
-  sumLhs <- rep(0, ncol(altVars))
-  
-  for (i in 0:(lastThresholdIndex - firstThresholdIndex + 1)) {
-    th_1 <- firstThresholdIndex + i - 1
-    th <- firstThresholdIndex + i
-    
-    if (th_1 >= firstThresholdIndex) {
-      lhs <- altVars[alternative, ]
-      lhs[th_1] <- -1
-      lhs[firstBinaryVarForThisAlternativeIndex + i] <- -RORUTADIS_BIGM
-      lhsData <- rbind(lhsData, lhs)
-      dirData <- c(dirData, ">=")
-      rhsData <- c(rhsData,-RORUTADIS_BIGM)
-    }
-    
-    if (th <= lastThresholdIndex) {
-      lhs <- altVars[alternative, ]
-      lhs[th] <- -1
-      lhs[epsilonIndex] <- 1
-      lhs[firstBinaryVarForThisAlternativeIndex + i] <- RORUTADIS_BIGM
-      lhsData <- rbind(lhsData, lhs)
-      dirData <- c(dirData, "<=")
-      rhsData <- c(rhsData, RORUTADIS_BIGM)
-    }
-    
-    sumLhs[firstBinaryVarForThisAlternativeIndex + i] <- 1
-  }
-  
-  lhsData <- rbind(lhsData, sumLhs)
-  dirData <- c(dirData, "==")
-  rhsData <- c(rhsData, 1)
-  
-  return (list(lhs = lhsData, dir = dirData, rhs = rhsData))
-}
-
 buildClassCardinalitieLBConstraint <- function(class,
                                                min,
                                                nrAlternatives,
@@ -227,10 +178,58 @@ addAlternativeThresholdComparisionConstraint <- function(alternative,
 
 #### HELPERS
 
-addVarialbesToModel <- function(model, variables) {
+addVarialbesToModel <- function(constraints, variables) {
   for (var in variables)
-    model$lhs <- cbind(model$lhs, 0)
-  model$types <- c(model$types, variables)
+    constraints$lhs <- cbind(constraints$lhs, 0)
+  constraints$types <- c(constraints$types, variables)
+  return (constraints)
+}
+
+extendModelWithAssignmentVariables <- function(model) {
+  nrAlternatives <- nrow(model$perfToModelVariables)
+  nrClasses <- model$nrClasses
+  
+  firstBinaryVariableIndex <- ncol(model$constraints$lhs) + 1
+  
+  model$constraints <- addVarialbesToModel(model$constraints, rep("B", nrAlternatives * model$nrClasses))
+  nrVariables <- ncol(model$constraints$lhs)
+  
+  for (i in seq_len(nrAlternatives)) {
+    for (h in seq_len(nrClasses)) {        
+      if (h > 1) {
+        lhs <- ua(i, nrVariables, model$perfToModelVariables)
+        lhs[model$firstThresholdIndex + h - 2] <- -1
+        lhs[firstBinaryVariableIndex + (i - 1) * nrClasses + h - 1] <- -RORUTADIS_BIGM
+        
+        model$constraints <- combineConstraints(model$constraints,
+                                                list(lhs = lhs, dir = ">=", rhs = -RORUTADIS_BIGM))
+      }
+      
+      if (h < nrClasses) {
+        lhs <- ua(i, nrVariables, model$perfToModelVariables)
+        rhs <- 0
+        lhs[model$firstThresholdIndex + h - 1] <- -1
+        
+        if (is.null(model$epsilonIndex)) {
+          rhs <- -RORUTADIS_MINEPS
+        } else {
+          lhs[model$epsilonIndex] <- 1
+        }
+        
+        lhs[firstBinaryVariableIndex + (i - 1) * nrClasses + h - 1] <- RORUTADIS_BIGM
+        
+        model$constraints <- combineConstraints(model$constraints,
+                                                list(lhs = lhs, dir = "<=", rhs = RORUTADIS_BIGM + rhs))
+      }
+    }
+    
+    lhs <- rep(0, nrVariables)
+    lhs[(firstBinaryVariableIndex + (i - 1) * nrClasses):(firstBinaryVariableIndex + i * nrClasses - 1)] <- 1
+    
+    model$constraints <- combineConstraints(model$constraints,
+                                            list(lhs = lhs, dir = "==", rhs = 1))
+  }
+  
   return (model)
 }
 
@@ -568,6 +567,8 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
   
   # preference information
   
+  # assignment examples
+  
   prefInfoIndex <- 1
   
   if (is.matrix(problem$assignmentsLB)) {
@@ -594,9 +595,42 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
       model$prefInfoToConstraints[[prefInfoIndex]] <- nrow(model$constraints$lhs)
       prefInfoIndex <- prefInfoIndex + 1
     }
-  }
+  }  
   
-  # todo: the rest of pref info to implement
+  if ((is.matrix(problem$assignmentPairwiseAtLeastComparisons) && nrow(problem$assignmentPairwiseAtLeastComparisons) > 0) ||
+        (is.matrix(problem$assignmentPairwiseAtMostComparisons) && nrow(problem$assignmentPairwiseAtMostComparisons) > 0) ||
+        (is.matrix(problem$minimalClassCardinalities) && nrow(problem$minimalClassCardinalities) > 0) ||
+        (is.matrix(problem$maximalClassCardinalities) && nrow(problem$maximalClassCardinalities) > 0)) {
+    model <- extendModelWithAssignmentVariables(model)
+    
+    # assignment-based pairwise comparisons
+    
+    if (is.matrix(problem$assignmentPairwiseAtLeastComparisons)) {
+      for (k in seq_len(nrow(problem$assignmentPairwiseAtLeastComparisons))) {
+        #todo
+      }
+    }
+    
+    if (is.matrix(problem$assignmentPairwiseAtMostComparisons)) {
+      for (k in seq_len(nrow(problem$assignmentPairwiseAtMostComparisons))) {
+        #todo
+      }
+    }    
+    
+    # desired class cardinalities
+    
+    if (is.matrix(problem$minimalClassCardinalities)) {
+      for (k in seq_len(nrow(problem$minimalClassCardinalities))) {
+        #todo
+      }
+    }
+    
+    if (is.matrix(problem$maximalClassCardinalities)) {
+      for (k in seq_len(nrow(problem$maximalClassCardinalities))) {
+        #todo
+      }
+    }
+  }
 
   return (model)
 }

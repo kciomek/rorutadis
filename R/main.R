@@ -66,18 +66,20 @@ checkRelation <- function(model, alternative, class, necessary) {
   }
 }
 
-checkClassCardinality <- function(class, maximum, nrAlternatives, nrClasses,
-                                  model, firstClAsgnBinVarIndex) {
-  obj <- rep(0, ncol(model$lhs))
-  for(alternative in 0:(nrAlternatives - 1)) {
-    index <- firstClAsgnBinVarIndex + alternative * nrClasses + class - 1
-    obj[index]  <- 1
+calculateExtremeClassCardinality <- function(model, class, maximum) {
+  firstAssignmentVariableIndex <- model$firstThresholdIndex + model$nrClasses - 1
+  
+  obj <- rep(0, ncol(model$constraints$lhs))
+  for(alternative in seq_len(nrow(model$perfToModelVariables))) {
+    obj[firstAssignmentVariableIndex + (alternative - 1) * model$nrClasses + class - 1]  <- 1
   }
-  ret <- Rglpk_solve_LP(obj, model$lhs, model$dir, model$rhs, max = maximum,
-                        types = model$types)
-  rm(model)
-  gc()
-  return (ret$optimum)
+  
+  solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
+                             max = maximum, types = model$constraints$types)
+  
+  stopifnot(solution$status == 0)
+  
+  return (solution$optimum)
 }
 
 # TRUE if alternative is always assigned to class at least as good as class of referenceAlternative
@@ -207,22 +209,23 @@ calculateExtremeClassCardinalities <- function(problem) {
   if (!checkConsistency(problem))
     stop("Model infeasible.")
   
-  baseModel <- buildBaseModel(problem, isEpsilonStrictyPositive = TRUE)
-  nrAlternatives <- nrow(problem$perf)
-  firstClAsgnBinVarIndex <- getFirstClAsgnBinVarIndex(problem)
-  rel <- matrix(nrow = problem$nrClasses, ncol = 2)
+  model <- buildModel(problem, FALSE)
+  
+  if (ncol(model$constraints$lhs) == model$firstThresholdIndex + problem$nrClasses - 2) {
+    model <- extendModelWithAssignmentVariables(model)
+  }
+
+  result <- matrix(nrow = problem$nrClasses, ncol = 2)
   
   for(class in 1:problem$nrClasses) {
-    rel[class, 1] <- checkClassCardinality(class, FALSE, nrAlternatives,
-                                           problem$nrClasses, baseModel, firstClAsgnBinVarIndex)
+    result[class, 1] <- calculateExtremeClassCardinality(model, class, FALSE)
     if (RORUTADIS_VERBOSE) print (paste("minimal cardinality of class ", class, "equals", rel[class, 1]))
     
-    rel[class, 2] <- checkClassCardinality(class, TRUE, nrAlternatives,
-                                           problem$nrClasses, baseModel, firstClAsgnBinVarIndex)
+    result[class, 2] <- calculateExtremeClassCardinality(model, class, TRUE)
     if (RORUTADIS_VERBOSE) print (paste("maximal cardinality of class ", class, "equals", rel[class, 2]))
   }
   
-  return (rel)
+  return (result)
 }
 
 #' Merge different assignments
