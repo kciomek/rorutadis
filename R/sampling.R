@@ -40,18 +40,23 @@
 calculateStochasticResults <- function(problem, nrSamples = 100) {
   stopifnot(nrSamples > 0)
   
-  model <- buildBaseModel(problem)
-  epsilonIndex <- getEpsilonIndex(problem)
-  ret <- maximizeEpsilon(model, epsilonIndex)
+  model <- buildModel(problem, TRUE)
   
-  if (!(ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS)) {
+  if (!isModelConsistent(model)) {
     stop("Model infeasible.")
+  }
+  
+  isSpaceContinuous <- all(model$constraints$types == "C")
+  
+  if (!isSpaceContinuous) {
+    warning("Calculating stochastic results for problems with assignement-based pairwise 
+            comparisons and/or desired class cardinalities may take a lot of time 
+            due to discontinuous character of sampling space.", immediate. = TRUE)
   }
   
   nrAlternatives <- nrow(problem$perf)
   nrCriteria <- ncol(problem$perf)
   nrClasses <- problem$nrClasses
-  altVars <- buildAltVariableMatrix(problem$perf)
   
   result <- list(assignments = NULL, preferenceRelation = NULL, classCardinalities = NULL)
   
@@ -59,23 +64,33 @@ calculateStochasticResults <- function(problem, nrSamples = 100) {
   result$preferenceRelation <- matrix(data = 0, nrow = nrAlternatives, ncol = nrAlternatives)
   result$classCardinalities <- matrix(data = 0, nrow = nrClasses, ncol = nrAlternatives + 1)
   
-  model <- buildBaseModel(problem, TRUE, FALSE, TRUE)
-  model$dir[which(model$dir == "==")] <- "="
-  geq <- which(model$dir == ">=")
-  
-  for (i in geq) {
-    model$rhs[i] <- -1 * model$rhs[i]
-    model$lhs[i, ] <- -1 * model$lhs[i, ]
+  if (isSpaceContinuous) {
+    model <- buildModel(problem, FALSE)
+  } else {
+    problemWithOnlyAssignmentsAsPreferenceInformation <- problem
+    problemWithOnlyAssignmentsAsPreferenceInformation$assignmentPairwiseAtLeastComparisons <- NULL
+    problemWithOnlyAssignmentsAsPreferenceInformation$assignmentPairwiseAtMostComparisons <- NULL
+    problemWithOnlyAssignmentsAsPreferenceInformation$minimalClassCardinalities <- NULL
+    problemWithOnlyAssignmentsAsPreferenceInformation$maximalClassCardinalities <- NULL
+    
+    problemWithOnlyAssignmentsAsPreferenceInformation
+    model <- buildModel(problemWithOnlyAssignmentsAsPreferenceInformation, FALSE)
   }
   
-  model$dir[geq] <- "<="
-  names(model)[1] <- "constr"
-  model[[4]] <- NULL
+  constraints <- model$constraints
+  constraints$dir[which(constraints$dir == "==")] <- "="
+  geq <- which(constraints$dir == ">=")
   
-  simplified <- extractSeparateVariables(model)
-  model <- simplified$model
+  for (i in geq) {
+    constraints$rhs[i] <- -1 * constraints$rhs[i]
+    constraints$lhs[i, ] <- -1 * constraints$lhs[i, ]
+  }
   
-  state <- har.init(model, thin.fn = function(n) { ceiling(log(n + 1)/4 * n^3) },
+  constraints$dir[geq] <- "<="
+  names(constraints)[1] <- "constr"
+  constraints[[4]] <- NULL
+  
+  state <- har.init(constraints, thin.fn = function(n) { ceiling(log(n + 1)/4 * n^3) },
                     thin = NULL, x0.randomize = FALSE, x0.method = "slacklp", x0 = NULL)
   
   producedSamples <- 0
@@ -84,17 +99,17 @@ calculateStochasticResults <- function(problem, nrSamples = 100) {
   while (producedSamples < nrSamples) {
     harSample <- har.run(state, n.samples = 1)
     state <- harSample$state
-    extendedSample <- extendResult(harSample$samples[1, ], simplified$variables, simplified$values)
-    thresholds <- getThresholdsFromHarSample(problem, extendedSample)
-    assignments <- getAssignmentsFromHarSample(extendedSample,
-                                               nrAlternatives,
-                                               altVars,
-                                               thresholds,
-                                               problem$nrClasses)
+    sample <- harSample$samples[1, ]
+    
+    thresholds <- getThresholdsFromF(model, sample)
+    assignments <- getAssignmentsFromF(model, sample, thresholds)
+    
     allGeneratedSamples <- allGeneratedSamples + 1
     
-    if (isAssignmentsValid(problem, assignments)) {
-      result$assignments <- addSampleAssignmetnsToResult(result$assignments, assignments)
+    if (isSpaceContinuous || isAssignmentsValid(problem, assignments)) { # isAssignmentsValid makes rejection sampling for discontinuous spaces
+      for (i in seq_len(length(assignments))) {
+        result$assignments[i, assignments[i]] <- result$assignments[i, assignments[i]] + 1
+      }
       
       for (i in seq_len(nrAlternatives)) {
         for (j in i:nrAlternatives) {
@@ -118,74 +133,17 @@ calculateStochasticResults <- function(problem, nrSamples = 100) {
       
       for (h in seq_len(nrClasses)) {
         result$classCardinalities[h, cardinalities[h] + 1] <- result$classCardinalities[h, cardinalities[h] + 1] + 1
-      }  
+      }
       
       producedSamples <- producedSamples + 1
     }
   }
-  
-  # print rejection sampling acceptance rate:
-  # print (producedSamples / allGeneratedSamples)
   
   result$assignments <- result$assignments / producedSamples
   result$preferenceRelation <- result$preferenceRelation / producedSamples
   result$classCardinalities <- result$classCardinalities / producedSamples
   result$acceptanceRateOfSecondPhaseSampling <- producedSamples / allGeneratedSamples
     
-  return (result)
-}
-
-extractSeparateVariables <- function(model) {
-  variables <- c()
-  values <- c()
-  rowsToRemove <- c()
-  
-  for (i in seq_len(nrow(model$constr))) {
-    if (model$dir[i] == "=" && length(which(model$constr[i, ] != 0)) == 1) {
-      var <- which(model$constr[i, ] != 0)
-      val <- model$rhs[i] / model$constr[i, var]
-      variables <- c(variables, var)
-      values <- c(values, val)
-      rowsToRemove <- c(rowsToRemove, i)
-      
-      for (j in seq_len(nrow(model$constr))) {
-        model$rhs[j] <- model$rhs[j] - model$constr[j, var] * val
-      }
-    }          
-  }
-  
-  if (length(variables) > 0) {
-    model$constr = model$constr[-rowsToRemove, -variables]
-    model$rhs <- model$rhs[-rowsToRemove]
-    model$dir <- model$dir[-rowsToRemove]
-  }
-  
-  return (list(model = model, variables = variables, values = values))
-}
-
-extendResult <- function(result, variables, values) {  
-  extended <- rep(0, length(result) + length(variables))
-  
-  j <- 1
-  k <- 1
-  for (i in seq_len(length(extended))) {
-    if (j <= length(variables) && variables[j] == i) {
-      extended[i] <- values[j]
-      j <- j + 1
-    } else {
-      extended[i] <- result[k]
-      k <- k + 1
-    }
-  }  
-  
-  return (extended)
-}
-
-addSampleAssignmetnsToResult <- function(result, assignments) {
-  for (i in seq_len(length(assignments))) {
-    result[i, assignments[i]] <- result[i, assignments[i]] + 1
-  }
-  
   return (result)
 }
 
@@ -237,31 +195,4 @@ isAssignmentsValid <- function(problem, assignmentsToCheck) {
   }
   
   return (TRUE)
-}
-
-getThresholdsFromHarSample <- function(problem, sample) {
-  firstThresholdIndex <- getFirstThresholdIndex(problem)
-  lastThresholdIndex <- getLastThresholdIndex(problem)
-  
-  return (sample[firstThresholdIndex:lastThresholdIndex])
-}
-
-getAssignmentsFromHarSample <- function(sample, nrAlternatives, altVars,
-                                        thresholds, nrClasses) {
-  assignments <- array(dim = nrAlternatives)
-  
-  for (i in seq_len(nrAlternatives)) {
-    for (h in seq_len(length(thresholds))) {
-      if (sum(altVars[i, ] * sample[1:ncol(altVars)]) < thresholds[h]) {
-        assignments[i] <- h
-        break
-      }
-    }
-    
-    if (is.na(assignments[i])) {
-      assignments[i] <- nrClasses
-    }
-  }
-  
-  return (assignments)
 }

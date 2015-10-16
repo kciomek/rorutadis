@@ -20,21 +20,15 @@ isModelConsistent <- function(model) {
   return (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS)
 }
 
-toSolution <- function(model, values) {
+getThresholdsFromF <- function(model, values) {
+  return (values[model$firstThresholdIndex:(model$firstThresholdIndex + model$nrClasses - 2)])
+}
+
+getAssignmentsFromF <- function(model, values, thresholds) {
   nrVariables <- ncol(model$constraints$lhs)
-  nrAlternatives <- nrow(model$perfToModelVariables)
-  nrCriteria <- ncol(model$perfToModelVariables)
-    
-  stopifnot(length(values) == nrVariables)
+  assignments <- c()
   
-  # thresolds
-  
-  thresholds <- values[model$firstThresholdIndex:(model$firstThresholdIndex + model$nrClasses - 2)]
-  
-  # assignments
-  
-  assignments <- c()  
-  for (i in seq_len(nrAlternatives)) {
+  for (i in seq_len(nrow(model$perfToModelVariables))) {
     assignments[i] <- 1
     
     for (h in seq_len(model$nrClasses - 1)) {
@@ -45,6 +39,24 @@ toSolution <- function(model, values) {
       assignments[i] <- assignments[i] + 1
     }
   }
+  
+  return (assignments)
+}
+
+toSolution <- function(model, values) {
+  nrVariables <- ncol(model$constraints$lhs)
+  nrAlternatives <- nrow(model$perfToModelVariables)
+  nrCriteria <- ncol(model$perfToModelVariables)
+    
+  stopifnot(length(values) == nrVariables)
+  
+  # thresolds
+  
+  thresholds <- getThresholdsFromF(model, values)
+  
+  # assignments
+  
+  assignments <- getAssignmentsFromF(model, values, thresholds)
   
   # epsilon
   
