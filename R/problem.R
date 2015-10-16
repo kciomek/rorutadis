@@ -858,10 +858,3 @@ getRestrictions <- function(problem, indices) {
   return (res)
 }
 
-
-#### HELPERS
-
-
-getNrLinearSegments <- function(characteristicPoints) {
-  return (sapply(characteristicPoints, function(x) { max(x - 1, 0) }))
-}

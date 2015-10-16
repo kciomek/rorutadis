@@ -612,28 +612,3 @@ ua <- function(alternative, nrVariables, perfToModelVariables) {
   
   return (res)
 }
-
-#### EXPLANATIONS HELPERS
-
-#' Remove constraints indices by restriction indices
-#' 
-#' This function allows to remove constraints indices from indices interval by restriction
-#' indices.
-#' @param constraintIntervalIndices Vector of interval indices of each restriction
-#' constraints. c(a_1, b_1, ..., a_n, b_n), where i-th of n restrictions is represented as
-#' model constraints at indices between a_i and b_i including a_i, b_i.
-#' @param restrictionToRemoveIndices Vector of indices of restrictions to remove.
-#' @return Vector of model constraints of restrictions which are NOT in restrictionToRemoveIndices.
-removeConstraintsByRestrictions <- function(constraintIntervalIndices, restrictionToRemoveIndices) {
-  res <- c()
-  nrRestrictions <- length(constraintIntervalIndices) / 2
-  
-  for (i in 1:nrRestrictions) {
-    if (!(i %in% restrictionToRemoveIndices)) {
-      res <- c(res, seq(constraintIntervalIndices[2 * i - 1], constraintIntervalIndices[2 * i]))
-    }
-  }
-  
-  return (res)
-}
-
