@@ -99,7 +99,6 @@ toSolution <- function(model, values) {
   }
   
   # alternative values
-  
   alternativeValues <- matrix(nrow=nrAlternatives, ncol=nrCriteria)
   
   for (i in seq_len(nrAlternatives)) {

@@ -274,10 +274,10 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
             }
             
             if (lowerChPointIndex < numberOfCharacteristicPoints - 2) {
-              perfToModelVariables[[i, j]][[1]] = c(firstChPointVariableIndex[j] + lowerChPointIndex - 1, lowerCoeff)
-              perfToModelVariables[[i, j]][[2]] = c(firstChPointVariableIndex[j] + lowerChPointIndex, upperCoeff)
+              perfToModelVariables[[i, j]][[1]] = c(firstChPointVariableIndex[j] + lowerChPointIndex, lowerCoeff)
+              perfToModelVariables[[i, j]][[2]] = c(firstChPointVariableIndex[j] + lowerChPointIndex + 1, upperCoeff)
             } else {
-              perfToModelVariables[[i, j]][[1]] = c(firstChPointVariableIndex[j] + lowerChPointIndex - 1, lowerCoeff)
+              perfToModelVariables[[i, j]][[1]] = c(firstChPointVariableIndex[j] + lowerChPointIndex, lowerCoeff)
             }
           }
         }
