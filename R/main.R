@@ -489,8 +489,19 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
   return (toSolution(model, solution$solution))
 }
 
-# todo: documentation of findSimpleFunction
-
+#' Find one value function
+#'
+#' This function finds single value function that is consistent with provided preferece information.
+#' Search is done by epsilon maximization.
+#' 
+#' @param problem Problem
+#' @return This function returns a solution for found value function.
+#' @examples
+#' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
+#' problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
+#' problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
+#' 
+#' simpleFunction <- findSimpleFunction(problem)
 #' @export
 findSimpleFunction <- function(problem) {
   model <- buildModel(problem, TRUE)
