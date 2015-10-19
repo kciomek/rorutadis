@@ -117,36 +117,6 @@ buildassignmentPairwiseAtMostComparisonsConstraints <- function(alternativeA,
   return (list(lhs = lhsData, dir = dirData, rhs = rhsData))
 }
 
-###### DESIRED CLASS CARDINALITIES
-
-buildClassCardinalitieLBConstraint <- function(class,
-                                               min,
-                                               nrAlternatives,
-                                               nrClasses,
-                                               firstIndex) {
-  lhs <- rep(0, firstIndex + nrAlternatives * nrClasses - 1)
-  for (i in seq(firstIndex + class - 1,
-                firstIndex + nrAlternatives * nrClasses - 1, by = nrClasses)) {
-    lhs[i] <- 1
-  }
-  
-  return (list(lhs = lhs, dir = ">=", rhs = min))
-}
-
-buildClassCardinalitieUBConstraint <- function(class,
-                                               max,
-                                               nrAlternatives,
-                                               nrClasses,
-                                               firstIndex) {
-  lhs <- rep(0, firstIndex + nrAlternatives * nrClasses - 1)
-  
-  for (i in seq(firstIndex + class - 1,
-                firstIndex + nrAlternatives * nrClasses - 1, by = nrClasses)) {
-    lhs[i] <- 1
-  }
-  
-  return (list(lhs = lhs, dir = "<=", rhs = max))
-}
 ###### ADDING CONSTRAINT TO MODEL FOR IMPROVEMENT AND DETERIORATION ASSIGNMENT
 
 addAlternativeThresholdComparisionConstraint <- function(alternative,
@@ -602,6 +572,8 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
         (is.matrix(problem$minimalClassCardinalities) && nrow(problem$minimalClassCardinalities) > 0) ||
         (is.matrix(problem$maximalClassCardinalities) && nrow(problem$maximalClassCardinalities) > 0)) {
     model <- extendModelWithAssignmentVariables(model)
+    firstAssignmentVariableIndex <- model$firstThresholdIndex + model$nrClasses - 1
+    numberOfVariables <- ncol(model$constraints$lhs)
     
     # assignment-based pairwise comparisons
     
@@ -621,13 +593,37 @@ buildModel <- function(problem, includeEpsilonAsVariable) {
     
     if (is.matrix(problem$minimalClassCardinalities)) {
       for (k in seq_len(nrow(problem$minimalClassCardinalities))) {
-        #todo
+        class <- problem$minimalClassCardinalities[k, 1]
+        cardinality <- problem$minimalClassCardinalities[k, 2]
+        
+        lhs <- rep(0, numberOfVariables)
+        lhs[seq(firstAssignmentVariableIndex + class - 1,
+                firstAssignmentVariableIndex + nrAlternatives * model$nrClasses - 1,
+                by = model$nrClasses)] <- 1
+        
+        
+        model$constraints <- combineConstraints(model$constraints, list(lhs = lhs, dir = ">=", rhs = cardinality))
+        
+        model$prefInfoToConstraints[[prefInfoIndex]] <- nrow(model$constraints$lhs)
+        prefInfoIndex <- prefInfoIndex + 1
       }
     }
     
     if (is.matrix(problem$maximalClassCardinalities)) {
       for (k in seq_len(nrow(problem$maximalClassCardinalities))) {
-        #todo
+        class <- problem$maximalClassCardinalities[k, 1]
+        cardinality <- problem$maximalClassCardinalities[k, 2]
+        
+        lhs <- rep(0, numberOfVariables)
+        lhs[seq(firstAssignmentVariableIndex + class - 1,
+                firstAssignmentVariableIndex + nrAlternatives * model$nrClasses - 1,
+                by = model$nrClasses)] <- 1
+        
+        
+        model$constraints <- combineConstraints(model$constraints, list(lhs = lhs, dir = "<=", rhs = cardinality))
+        
+        model$prefInfoToConstraints[[prefInfoIndex]] <- nrow(model$constraints$lhs)
+        prefInfoIndex <- prefInfoIndex + 1
       }
     }
   }
