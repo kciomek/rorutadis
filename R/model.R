@@ -38,35 +38,6 @@ buildUBAssignmentsConstraint <- function(alternative, atMostToClass, model, excl
   return (list(lhs = lhs, dir = "<=", rhs = rhs))
 }
 
-###### ADDING CONSTRAINT TO MODEL FOR IMPROVEMENT AND DETERIORATION ASSIGNMENT
-
-addAlternativeThresholdComparisionConstraint <- function(alternative,
-                                                         threshold,
-                                                         model,
-                                                         altVars,
-                                                         necessary,
-                                                         firstThresholdIndex,
-                                                         lastThresholdIndex,
-                                                         uxIndex = NULL) {
-  if (threshold < 1 || threshold > lastThresholdIndex - firstThresholdIndex + 1)
-    return (model)
-  
-  lhs <- altVars[alternative, ]  
-  lhs <- c(lhs, rep(0, ncol(model$lhs) - ncol(altVars)))
-  lhs[firstThresholdIndex + threshold - 1] <- -1
-  
-  dir <- NULL
-  if (necessary) dir <- "<="
-  else dir <- ">="
-  
-  if (!is.null(uxIndex)) {
-    lhs[uxIndex] <- 1
-    lhs[uxIndex + 1] <- -1
-  }
-  
-  return (combineConstraints(model, list(lhs = lhs, dir = dir, rhs = 0)))
-}
-
 #### HELPERS
 
 addVarialbesToModel <- function(constraints, variables) {
