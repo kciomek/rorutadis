@@ -91,14 +91,14 @@ compareAssignment <- function(model, alternative, referenceAlternative) {
   }
   
   for (class in seq_len(model$nrClasses - 1)) {
-    constraintForI <- buildUBAssignmentsConstraint(alternative, class, model)
-    constraintForJ <- buildLBAssignmentsConstraint(referenceAlternative, class + 1, model)
+    newModel <- model
     
-    model$constraints <- combineConstraints(model$constraints, constraintForI, constraintForJ)
+    constraintForI <- buildUBAssignmentsConstraint(alternative, class, newModel)
+    constraintForJ <- buildLBAssignmentsConstraint(referenceAlternative, class + 1, newModel)
     
-    ret <- maximizeEpsilon(model)
+    newModel$constraints <- combineConstraints(newModel$constraints, constraintForI, constraintForJ)
     
-    if (ret$status == 0 && ret$optimum >= RORUTADIS_MINEPS) {
+    if (isModelConsistent(newModel)) {
       return (FALSE)
     }
   }
