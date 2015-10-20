@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{findSimpleFunction}
 \alias{findSimpleFunction}
-\title{Find value function}
+\title{Find one value function}
 \usage{
 findSimpleFunction(problem)
 }
@@ -10,7 +10,14 @@ findSimpleFunction(problem)
 \item{problem}{Problem}
 }
 \value{
-This function returns a solution for found value function.
+List with named elements:
+\itemize{
+\item \code{vf} - list of 2-column matrices with marginal value functions (characteristic point in rows),
+\item \code{thresholds},
+\item \code{assignments},
+\item \code{alternativeValues},
+\item \code{epsilon}.
+}
 }
 \description{
 This function finds single value function that is consistent with provided preferece information.
@@ -22,5 +29,10 @@ problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
 problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
 
 simpleFunction <- findSimpleFunction(problem)
+}
+\seealso{
+\code{\link{plotVF}}
+\code{\link{plotComprehensiveValue}}
+\code{\link{findRepresentativeFunction}}
 }
 

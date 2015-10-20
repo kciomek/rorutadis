@@ -1,4 +1,4 @@
-###### ASSIGNEMNT EXAMPLES
+#### HELPERS
 
 buildLBAssignmentsConstraint <- function(alternative, atLeastToClass, model, excludingVariableIndex = NULL) {
   if (atLeastToClass <= 1 || atLeastToClass > model$nrClasses)
@@ -37,8 +37,6 @@ buildUBAssignmentsConstraint <- function(alternative, atMostToClass, model, excl
   
   return (list(lhs = lhs, dir = "<=", rhs = rhs))
 }
-
-#### HELPERS
 
 addVarialbesToModel <- function(constraints, variables) {
   for (var in variables)

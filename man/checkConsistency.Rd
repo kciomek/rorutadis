@@ -11,10 +11,10 @@ checkConsistency(problem)
 }
 \value{
 \code{TRUE} if a model of a problem is feasible and \code{FALSE}
-if infeasible.
+otherwise.
 }
 \description{
-This function allows to check consistency of a problem.
+This function allows to check if preference information is consistent.
 }
 \examples{
 perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)

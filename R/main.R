@@ -2,11 +2,11 @@
 
 #' Check problem consistency
 #'
-#' This function allows to check consistency of a problem.
+#' This function allows to check if preference information is consistent.
 #' 
 #' @param problem Problem to check. 
 #' @return \code{TRUE} if a model of a problem is feasible and \code{FALSE}
-#' if infeasible.
+#' otherwise.
 #' @examples
 #' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
 #' problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
@@ -27,7 +27,7 @@ checkRelation <- function(model, alternative, class, necessary) {
       additionalConstraints <- buildLBAssignmentsConstraint(alternative, 2, model)
     } else if (class == model$nrClasses) {
       additionalConstraints <- buildUBAssignmentsConstraint(alternative, model$nrClasses - 1, model)
-    } else if (class > 1 && class < problem$nrClasses) {
+    } else if (class > 1 && class < model$nrClasses) {
       model$constraints <- addVarialbesToModel(model$constraints, c("B", "B"))
       nrVariables <- ncol(model$constraints$lhs)
       
@@ -316,24 +316,29 @@ mergeAssignments <- function(assignmentList, necessary) {
 #' \item \code{0} - iterative mode,
 #' \item \code{1} - compromise mode.
 #' }
-#' @param relation A matrix of assignment pairwise comparisons. Can be provided if
-#' it has been calculated earlier (with \code{\link{compareAssignments}}). If
-#' the parameter is \code{NULL}, it will be computed.
-#' @return This function returns a result of solving model of a problem. It can be
-#' used for further computations (e.g. \code{\link{getThresholds}},
-#' \code{\link{getMarginalUtilities}}, \code{\link{getCharacteristicPoints}}). If representative utility function was
-#' not found, the function returns \code{NULL}.
+#' @param relation A matrix of assignment pairwise comparisons (see
+#' \code{\link{compareAssignments}}). If the parameter is \code{NULL}, the relation
+#' will be computed.
+#' @return List with named elements:
+#' \itemize{
+#' \item \code{vf} - list of 2-column matrices with marginal value functions (characteristic point in rows),
+#' \item \code{thresholds},
+#' \item \code{assignments},
+#' \item \code{alternativeValues},
+#' \item \code{epsilon}.
+#' }
+#' \code{NULL} is returned if representative function cannot be found.
 #' @seealso
-#' \code{\link{getCharacteristicPoints}}
-#' \code{\link{getMarginalUtilities}} 
-#' \code{\link{getThresholds}}
+#' \code{\link{plotVF}}
+#' \code{\link{plotComprehensiveValue}}
+#' \code{\link{findSimpleFunction}}
 #' @examples
 #' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
 #' problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
 #' problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
 #' 
 #' representativeFunction <- findRepresentativeFunction(problem, 0)
-#' thresholds <- getThresholds(problem, representativeFunction)
+#' assignments <- representativeFunction$assignments
 #' @export
 findRepresentativeFunction <- function(problem, mode, relation = NULL) {
   stopifnot(mode == 0 || mode == 1)
@@ -495,7 +500,18 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
 #' Search is done by epsilon maximization.
 #' 
 #' @param problem Problem
-#' @return This function returns a solution for found value function.
+#' @return List with named elements:
+#' \itemize{
+#' \item \code{vf} - list of 2-column matrices with marginal value functions (characteristic point in rows),
+#' \item \code{thresholds},
+#' \item \code{assignments},
+#' \item \code{alternativeValues},
+#' \item \code{epsilon}.
+#' }
+#' @seealso
+#' \code{\link{plotVF}}
+#' \code{\link{plotComprehensiveValue}}
+#' \code{\link{findRepresentativeFunction}}
 #' @examples
 #' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
 #' problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
