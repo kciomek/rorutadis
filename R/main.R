@@ -156,6 +156,7 @@ calculateAssignments <- function(problem, necessary) {
 #' This function compares assignments.
 #'
 #' @param problem Problem for which assignments will be compared.
+#' @param necessary Whether necessary or possible assignments.
 #' @return \emph{n} x \emph{n} logical matrix, where \code{n} is a number of
 #' alternatives. Cell \code{[i, j]} is \code{TRUE} if \emph{a_i} is assigned to
 #' class at least as good as class of \emph{a_j} for all compatible value
@@ -167,7 +168,11 @@ calculateAssignments <- function(problem, necessary) {
 #' 
 #' resultOfComparison <- compareAssignments(problem)
 #' @export
-compareAssignments <- function(problem) {
+compareAssignments <- function(problem, necessary = TRUE) {
+  if (necessary == FALSE) {
+    stop("Comparing possible assignments not supported.")
+  } 
+  
   nrAlternatives <- nrow(problem$perf)
   model <- buildModel(problem, T)
   

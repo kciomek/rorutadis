@@ -4,10 +4,12 @@
 \alias{compareAssignments}
 \title{Compare assignments}
 \usage{
-compareAssignments(problem)
+compareAssignments(problem, necessary = TRUE)
 }
 \arguments{
 \item{problem}{Problem for which assignments will be compared.}
+
+\item{necessary}{Whether necessary or possible assignments.}
 }
 \value{
 \emph{n} x \emph{n} logical matrix, where \code{n} is a number of
