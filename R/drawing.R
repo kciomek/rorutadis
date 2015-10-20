@@ -4,16 +4,15 @@
 #'
 #' This function draws marginal value functions and alternative utilities chart.
 #' 
-#' @param problem Problem whose model was solved.
-#' @param solution Result of model solving (e.g. result of
-#' \code{\link{findRepresentativeFunction}} or \code{\link{investigateUtility}}).
-#' @param printLabels Whether print alternatives identifiers on marginal value
-#' function plots and utility values on alternative utility chart or not
-#' (default \code{TRUE}).
+#' This function is deprecated. Use \code{\link{plotVF}} and \code{\link{plotComprehensiveValue}}.
+#' 
+#' @param problem Problem.
+#' @param solution Solution.
 #' @param criteria Vector containing  \emph{0} for utility chart and/or indices
 #' of criteria for which marginal value functions should be plotted.
 #' If this parameter was \code{NULL} functions for all criteria and utility chart
 #' will be plotted (default \code{NULL}).
+#' @param printLabels Whether to print labels.
 #' @param plotsPerRow Number of plots per row (default \code{2}).
 #' @param descending Mode of sorting alternatives on utility chart:
 #' \itemize{
@@ -21,18 +20,9 @@
 #' \item \code{TRUE} - sorted descending by value of utility,
 #' \item \code{FALSE} - sorted ascending by value of utility.
 #' }
-#' 
-#' @return Plot.
 #' @seealso
-#' \code{\link{findRepresentativeFunction}}
-#' \code{\link{investigateUtility}}
-#' @examples
-#' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
-#' problem <- buildProblem(perf, 3, FALSE, c('c', 'g'), c(3, 3))
-#' problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
-#' 
-#' representativeFunction <- findRepresentativeFunction(problem, 0)
-#' drawUtilityPlots(problem, representativeFunction)
+#' \code{\link{plotVF}}
+#' \code{\link{plotComprehensiveValue}}
 #' @import ggplot2
 #' @import gridExtra
 #' @export
@@ -57,49 +47,121 @@ drawUtilityPlots <- function(problem, solution, printLabels = TRUE,
   
   nCol <- max(floor(sqrt(length(graphs))), plotsPerRow)
   
-  grid.arrange(do.call(arrangeGrob, c(graphs, list(ncol = nCol))))
+  grid.arrange(grobs=graphs, ncol=nCol)
 }
 
-# todo: documentation of plotVF
+#' Plot value function
+#' 
+#' This function draws value function for selected criteria.
+#' 
+#' @param solution Solution to plot (e.g. result of
+#' \code{\link{findRepresentativeFunction}}, \code{\link{findSimpleFunction}}
+#' or \code{\link{investigateUtility}}).
+#' @param criteria Indices of criteria to plot. If NULL all criteria will be plotted.
+#' @param yAxis Y axis limit (\code{"adjusted"} - maximal value on single plot,
+#' \code{"max"} - maximal value on all criteria,
+#' \code{"unit"} - one).
+#' @param showAlternatives Whether to mark values of alternatives.
+#' @param titles Vector of titles for charts or boolean value(s) whether default title should be used.
+#' @param plotsPerRow Maximal plots per row.
+#' @seealso
+#' \code{\link{findRepresentativeFunction}}
+#' \code{\link{findSimpleFunction}}
+#' \code{\link{investigateUtility}}
+#' \code{\link{plotComprehensiveValue}}
+#' @examples
+#' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
+#' problem <- buildProblem(perf, 3, FALSE, c('c', 'g'), c(3, 3))
+#' problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
+#' 
+#' representativeFunction <- findRepresentativeFunction(problem, 0)
+#' plotVF(representativeFunction)
+#' @import ggplot2
+#' @import gridExtra
 #' @export
-plotVF <- function(solution, criterion, yAxis = "max", showAlternatives = FALSE, title = TRUE) {
+plotVF <- function(solution, criteria = NULL, yAxis = "max", showAlternatives = FALSE, titles = TRUE, plotsPerRow = 2) {
   stopifnot(yAxis %in% c("adjusted", "max", "unit"))
   
-  df <- as.data.frame(solution$vf[[criterion]])
-  
-  p <- ggplot(df, aes(x, y)) + 
-    geom_point(size = 4) +
-    xlab("performance") +
-    ylab("value") +
-    theme_bw(base_size = 20)
-  
-  if (!solution$generalVF[criterion]) {
-    p <- p + geom_line(data = df, aes(x, y))
+  if (is.null(criteria)) {
+    criterion <- seq_len(length(solution$vf))
   }
   
-  if (yAxis == "unit") {
-    p <- p + ylim(0, 1)
-  } else if (yAxis == "max") {
-    p <- p + ylim(0, max(sapply(solution$vf, function(w) { max(w[, 2]) })))
-  }
-  
-  if (is.logical(title)) {
-    if (title) {
-      p <- p + ggtitle(paste("Value function of criterion", criterion))
+  if (length(criteria) == 1) {
+    criterion <- criteria
+    df <- as.data.frame(solution$vf[[criterion]])
+    
+    p <- ggplot(df, aes_string("x", "y")) + 
+      geom_point(size = 4) +
+      xlab("performance") +
+      ylab("value") +
+      theme_bw(base_size = 20)
+    
+    if (!solution$generalVF[criterion]) {
+      p <- p + geom_line(data = df, aes_string("x", "y"))
     }
+    
+    if (yAxis == "unit") {
+      p <- p + ylim(0, 1)
+    } else if (yAxis == "max") {
+      p <- p + ylim(0, max(sapply(solution$vf, function(w) { max(w[, 2]) })))
+    }
+    
+    if (is.logical(title)) {
+      if (title) {
+        p <- p + ggtitle(paste("Criterion", criterion))
+      }
+    } else {
+      p <- p + ggtitle(title)
+    }
+    
+    if (showAlternatives) {
+      # todo
+      warning ("showAlternatives is not supported yet")
+    }
+    
+    return (p)
   } else {
-    p <- p + ggtitle(title)
+    ncol <- min(length(criteria), plotsPerRow)
+    titleVector <- title
+      
+    if (length(title) == 1) {
+      titleVector <- rep(title, length(criteria))
+    } else {
+      stopifnot(length(titleVector) == length(criteria))
+    }
+    
+    grid.arrange(grobs=lapply(criteria,
+                              function(w) {
+                                plotVF(solution, w, yAxis, showAlternatives, titleVector[w], plotsPerRow)
+                                } ),
+                 ncol=ncol)
   }
-  
-  if (showAlternatives) {
-    # todo
-    warning ("showAlternatives is not supported yet")
-  }
-  
-  return (p)
 }
 
-# todo: documentation of plotComprehensiveValue
+#' Plot comprehensive values of altarnatives
+#' 
+#' This function draws bar chart of comprehensive values of altarnatives.
+#' 
+#' @param solution Solution to plot (e.g. result of
+#' \code{\link{findRepresentativeFunction}}, \code{\link{findSimpleFunction}}
+#' or \code{\link{investigateUtility}}).
+#' @param order Order of alternatives (\code{"alternatives"}, \code{"asc"}, \code{"desc"}).
+#' @param showThresholds Whether to print threholds (dashed lines).
+#' @param title Title for chart or boolean value whether default title should be used.
+#' @return Plot.
+#' @seealso
+#' \code{\link{findRepresentativeFunction}}
+#' \code{\link{findSimpleFunction}}
+#' \code{\link{investigateUtility}}
+#' \code{\link{plotVF}}
+#' @examples
+#' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.4), ncol = 2)
+#' problem <- buildProblem(perf, 3, FALSE, c('c', 'g'), c(3, 3))
+#' problem <- addAssignmentsLB(problem, c(1, 2), c(2, 3))
+#' 
+#' representativeFunction <- findRepresentativeFunction(problem, 0)
+#' plotComprehensiveValue(representativeFunction)
+#' @import ggplot2
 #' @export
 plotComprehensiveValue <- function(solution, order = "alternatives", showThresholds = FALSE, title = FALSE) {
   stopifnot(order %in% c("alternatives", "asc", "desc"))
@@ -119,7 +181,7 @@ plotComprehensiveValue <- function(solution, order = "alternatives", showThresho
                    value = sapply(seq_len(nrAlternatives), function(w) { sum(solution$alternativeValues[w, ]) } ),
                    class = paste("C", solution$assignments, sep=""))
   
-  p <- ggplot(data = df, aes(x = alternative, y = value, fill = class)) +
+  p <- ggplot(data = df, aes_string(x = "alternative", y = "value", fill = "class")) +
     geom_bar(stat = "identity") +
     xlab("alternative") +
     ylab("comprehensive value") +
