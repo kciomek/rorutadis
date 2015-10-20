@@ -83,7 +83,7 @@ plotVF <- function(solution, criteria = NULL, yAxis = "max", showAlternatives = 
   stopifnot(yAxis %in% c("adjusted", "max", "unit"))
   
   if (is.null(criteria)) {
-    criterion <- seq_len(length(solution$vf))
+    criteria <- seq_len(length(solution$vf))
   }
   
   if (length(criteria) == 1) {
@@ -106,12 +106,12 @@ plotVF <- function(solution, criteria = NULL, yAxis = "max", showAlternatives = 
       p <- p + ylim(0, max(sapply(solution$vf, function(w) { max(w[, 2]) })))
     }
     
-    if (is.logical(title)) {
-      if (title) {
+    if (is.logical(titles)) {
+      if (titles) {
         p <- p + ggtitle(paste("Criterion", criterion))
       }
     } else {
-      p <- p + ggtitle(title)
+      p <- p + ggtitle(titles)
     }
     
     if (showAlternatives) {
@@ -122,17 +122,17 @@ plotVF <- function(solution, criteria = NULL, yAxis = "max", showAlternatives = 
     return (p)
   } else {
     ncol <- min(length(criteria), plotsPerRow)
-    titleVector <- title
+    titleVector <- titles
       
-    if (length(title) == 1) {
-      titleVector <- rep(title, length(criteria))
+    if (length(titles) == 1) {
+      titleVector <- rep(titles, length(criteria))
     } else {
       stopifnot(length(titleVector) == length(criteria))
     }
     
-    grid.arrange(grobs=lapply(criteria,
+    grid.arrange(grobs=lapply(seq_len(length(criteria)),
                               function(w) {
-                                plotVF(solution, w, yAxis, showAlternatives, titleVector[w], plotsPerRow)
+                                plotVF(solution, criteria[w], yAxis, showAlternatives, titleVector[w], plotsPerRow)
                                 } ),
                  ncol=ncol)
   }
