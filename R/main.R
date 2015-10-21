@@ -389,7 +389,7 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     obj[deltaIndex] <- 1  
     obj[deltaIndex + 1] <- -1 
     solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
-                               max = TRUE, types = model$types)
+                               max = TRUE, types = model$constraints$types)
     
     if (solution$status != 0) {
       return (NULL)
@@ -436,7 +436,7 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     obj[gammaIndex] <- 1  
     obj[gammaIndex + 1] <- -1 
     solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
-                               max = FALSE, types = model$types)
+                               max = FALSE, types = model$constraints$types)
     
     if (solution$status != 0) {
       return (NULL)
@@ -485,7 +485,7 @@ findRepresentativeFunction <- function(problem, mode, relation = NULL) {
     obj[deltaIndex] <- 1  
     obj[deltaIndex + 1] <- -1 
     solution <- Rglpk_solve_LP(obj, model$constraints$lhs, model$constraints$dir, model$constraints$rhs,
-                               max = TRUE, types = model$types)
+                               max = TRUE, types = model$constraints$types)
     
     if (solution$status != 0) {
       return (NULL)
