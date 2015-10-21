@@ -30,6 +30,7 @@ isSuperset <- function(set, subset) {
 #' \code{\link{getPreferentialCore}}
 #' \code{\link{getRestrictions}}
 #' \code{\link{calculateAssignments}}
+#' @importFrom utils combn
 #' @examples
 #' perf <- matrix(c(5, 2, 1, 7, 0.5, 0.9, 0.4, 0.5), ncol = 2)
 #' problem <- buildProblem(perf, 3, FALSE, c('g', 'g'), c(0, 0))
