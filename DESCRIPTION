@@ -1,8 +1,8 @@
 Package: rorutadis
 Type: Package
 Title: Robust Ordinal Regression UTADIS
-Version: 0.3.0
-Date: 2015-10-21
+Version: 0.3.1
+Date: 2015-11-04
 Author: Krzysztof Ciomek
 Maintainer: Krzysztof Ciomek <k.ciomek@gmail.com>
 URL: https://github.com/kciomek/rorutadis/
