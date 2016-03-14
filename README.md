@@ -6,6 +6,15 @@ an implementation of Robust Ordinal Regression for value-based sorting with some
 extensions and additional tools. It is a novel Multiple-Criteria Decision Aiding
 (MCDA) framework.
 
+
+Installation
+------------
+
+Install the latest release from CRAN:
+
+    install.packages("rorutadis")
+
+
 Credits
 -------
 
