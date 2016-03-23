@@ -45,7 +45,7 @@ extendModelWithAssignmentComparisonVariables <- function(model, firstAssignmentV
 }
 
 
-findSolutionWithIncomplete <- function(problem, stochasticResults, method, reg = 1e-20) {
+findSolutionWithIncomplete <- function(problem, stochasticResults, method, reg = 1e-20, accuracy = 1e-10) {
   stopifnot(method %in% c("cai-product", "apoi-product", "combined-product"))
   
   if (!checkConsistency(problem)) {
@@ -80,16 +80,31 @@ findSolutionWithIncomplete <- function(problem, stochasticResults, method, reg =
   if (method %in% c("apoi-product", "combined-product")) {
     firstAssignmentVariableIndex <- firstAssignmentVariableIndex + numberOfClasses * numberOfAlternatives
     
-    for (i in seq_len(numberOfAlternatives)) {
-      for (j in seq_len(numberOfAlternatives)) {
-        if (i != j) {
-          k <- j
-          if (j > i) {
-            k <- k - 1
-          }
-          
-          objective[firstAssignmentVariableIndex + (i - 1) * (numberOfAlternatives - 1) + k - 1] <- log(stochasticResults$preferenceRelation[i, j] + reg)
-        }
+    for (i in seq_len(numberOfAlternatives-1)) {
+      for (j in (i+1):numberOfAlternatives) {
+        k <- j - 1
+        
+        apei_ij <- (stochasticResults$preferenceRelation[i, j] + stochasticResults$preferenceRelation[j, i]) - 1.0
+        apwi_ij <- stochasticResults$preferenceRelation[i, j] - apei_ij
+        apwi_ji <- stochasticResults$preferenceRelation[j, i] - apei_ij
+        
+        print (c(stochasticResults$preferenceRelation[i, j], stochasticResults$preferenceRelation[j, i], apei_ij, apwi_ij, apwi_ji))
+        
+        stopifnot(apei_ij > -accuracy && apwi_ij > -accuracy && apwi_ji > -accuracy)
+        
+        apei_ij <- max(0.0, apei_ij)
+        apwi_ij <- max(0.0, apwi_ij)
+        apwi_ji <- max(0.0, apwi_ji)
+        
+        # v_ij  
+        objective[firstAssignmentVariableIndex + (i - 1) * (numberOfAlternatives - 1) + k - 1] <- objective[firstAssignmentVariableIndex + (i - 1) * (numberOfAlternatives - 1) + k - 1]  + log(apwi_ij + reg)
+        
+        # v_ji
+        objective[firstAssignmentVariableIndex + (j - 1) * (numberOfAlternatives - 1) + i - 1] <- objective[firstAssignmentVariableIndex + (j - 1) * (numberOfAlternatives - 1) + i - 1] + log(apwi_ji + reg)
+        
+        # e_ij
+        objective[firstAssignmentVariableIndex + (i - 1) * (numberOfAlternatives - 1) + k - 1] <- objective[firstAssignmentVariableIndex + (i - 1) * (numberOfAlternatives - 1) + k - 1] - log(apei_ij + reg)
+        objective[firstAssignmentVariableIndex + (j - 1) * (numberOfAlternatives - 1) + i - 1] <- objective[firstAssignmentVariableIndex + (j - 1) * (numberOfAlternatives - 1) + i - 1] - log(apei_ij + reg)
       }
     }
   }
