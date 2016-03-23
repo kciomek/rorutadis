@@ -46,6 +46,8 @@ extendModelWithAssignmentComparisonVariables <- function(model, firstAssignmentV
 
 
 findSolutionWithIncomplete <- function(problem, stochasticResults, method, reg = 1e-20) {
+  stopifnot(method %in% c("cai-product", "apoi-product", "combined-product"))
+  
   if (!checkConsistency(problem)) {
     stop("Model infeasible.")
   }
