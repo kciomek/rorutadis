@@ -10,13 +10,13 @@ findSolutionWithIncomplete(problem, stochasticResults, method, reg = 1e-20,
 \arguments{
 \item{problem}{Problem to investigate.}
 
-\item{stochasticResults}{Results of (see \code{\link{calculateStochasticResults}}).}
+\item{stochasticResults}{Stochastic results (see \code{\link{calculateStochasticResults}}).}
 
 \item{method}{\code{cai-product}, \code{apoi-product}, or \code{combined-product}.}
 
-\item{reg}{}
+\item{reg}{Reg}
 
-\item{accuracy}{}
+\item{accuracy}{Accuracy}
 }
 \value{
 List with named elements:

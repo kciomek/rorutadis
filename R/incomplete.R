@@ -49,10 +49,10 @@ extendModelWithAssignmentComparisonVariables <- function(model, firstAssignmentV
 #' This function finds a single value function from incomplete preference information for a problem.
 #' 
 #' @param problem Problem to investigate.
-#' @param stochasticResults Results of (see \code{\link{calculateStochasticResults}}).
+#' @param stochasticResults Stochastic results (see \code{\link{calculateStochasticResults}}).
 #' @param method \code{cai-product}, \code{apoi-product}, or \code{combined-product}.
-#' @param reg
-#' @param accuracy
+#' @param reg Reg
+#' @param accuracy Accuracy
 #' @return List with named elements:
 #' \itemize{
 #' \item \code{vf} - list of 2-column matrices with marginal value functions (characteristic point in rows),
