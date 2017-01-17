@@ -2,9 +2,8 @@ rorutadis
 =========
 
 This project is an [R](http://www.r-project.org "R project") package containing
-an implementation of Robust Ordinal Regression for value-based sorting with some
-extensions and additional tools. It is a novel Multiple-Criteria Decision Aiding
-(MCDA) framework.
+an implementation of Robust Ordinal Regression for multiple criteria value-based
+sorting with some extensions and additional tools.
 
 
 Installation
