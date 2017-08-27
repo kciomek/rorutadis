@@ -166,12 +166,8 @@ plotVF <- function(solution, criteria = NULL, yAxis = "max", showAlternatives = 
 plotComprehensiveValue <- function(solution, order = "alternatives", showThresholds = FALSE, title = FALSE) {
   stopifnot(order %in% c("alternatives", "asc", "desc"))
   
-  if (order %in% c("asc", "desc")) {
-    stop ("selected order is not supported yet")
-  }
-  
   nrAlternatives <- nrow(solution$alternativeValues)
-  alternativeNames <- names(solution$alternativeValues)
+  alternativeNames <- rownames(solution$alternativeValues)
   
   if (is.null(alternativeNames)) {
     alternativeNames <- paste("a", seq_len(nrAlternatives), sep="")
@@ -180,6 +176,16 @@ plotComprehensiveValue <- function(solution, order = "alternatives", showThresho
   df <- data.frame(alternative = alternativeNames,
                    value = sapply(seq_len(nrAlternatives), function(w) { sum(solution$alternativeValues[w, ]) } ),
                    class = paste("C", solution$assignments, sep=""))
+  
+  xOrder <- seq_len(nrAlternatives)
+  
+  if (order == "asc") {
+    xOrder <- order(df$value)
+  } else if (order == "desc") {
+    xOrder <- order(-df$value)
+  }
+  
+  df$alternative <- factor(df$alternative, levels=alternativeNames[xOrder])
   
   p <- ggplot(data = df, aes_string(x = "alternative", y = "value", fill = "class")) +
     geom_bar(stat = "identity") +
