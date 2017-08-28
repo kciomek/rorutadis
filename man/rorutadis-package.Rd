@@ -13,7 +13,7 @@ sorting with some extensions and additional tools.
 \tabular{ll}{
 Package: \tab rorutadis\cr
 Type: \tab Package\cr
-Version: \tab 0.4.3\cr
+Version: \tab 0.4.4\cr
 Date: \tab 2017-08-28\cr
 License: \tab GPL-3\cr
 }

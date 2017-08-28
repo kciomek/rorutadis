@@ -163,8 +163,9 @@ plotVF <- function(solution, criteria = NULL, yAxis = "max", showAlternatives = 
 #' plotComprehensiveValue(representativeFunction)
 #' @import ggplot2
 #' @export
-plotComprehensiveValue <- function(solution, order = "alternatives", showThresholds = FALSE, title = FALSE) {
+plotComprehensiveValue <- function(solution, order = "alternatives", showThresholds = FALSE, title = FALSE, classLabels = NULL) {
   stopifnot(order %in% c("alternatives", "asc", "desc"))
+  stopifnot(is.null(classLabels) || length(classLabels) == length(solution$thresholds) + 1)
   
   nrAlternatives <- nrow(solution$alternativeValues)
   alternativeNames <- rownames(solution$alternativeValues)
@@ -173,9 +174,13 @@ plotComprehensiveValue <- function(solution, order = "alternatives", showThresho
     alternativeNames <- paste("a", seq_len(nrAlternatives), sep="")
   }
   
+  if (is.null(classLabels)) {
+    classLabels <- paste("C", seq_len(length(solution$thresholds) + 1), sep="")
+  }
+  
   df <- data.frame(alternative = alternativeNames,
                    value = sapply(seq_len(nrAlternatives), function(w) { sum(solution$alternativeValues[w, ]) } ),
-                   class = paste("C", solution$assignments, sep=""))
+                   class = classLabels[solution$assignments])
   
   xOrder <- seq_len(nrAlternatives)
   
